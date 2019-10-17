@@ -18,7 +18,10 @@ class CreateTerritoriesReportsTable extends Migration
             $table->integer('report_id');
             $table->date('date');
             $table->string('territory');
-            $table->integer('count');
+            $table->integer('sale_count');
+            $table->integer('payout_count');
+            $table->bigInteger('sum');
+            $table->bigInteger('lost_sum');
             $table->timestamps();
         });
     }
