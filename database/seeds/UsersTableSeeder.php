@@ -18,8 +18,8 @@ class UsersTableSeeder extends Seeder
 
         $employee = new User();
         $employee->name = 'admin';
-        $employee->email = 'IAkbergen@cic.kz';
-        $employee->password = bcrypt('sPass123!');
+        $employee->email = env('ADMIN_LOGIN');
+        $employee->password = bcrypt(env('ADMIN_PASSWORD'));
         $employee->save();
         $employee->roles()->attach($role_admin);
 
