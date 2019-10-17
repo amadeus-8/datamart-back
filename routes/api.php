@@ -28,9 +28,8 @@ Route::group([
     });
 });
 
-Route::post('getreport', function (Request $request) {
-    return response()->json([
-        'from' => $request->from,
-        'to'   => $request->to
-    ]);
+Route::group([
+    'middleware' => 'auth:api'
+], function () {
+    Route::post('getreport', 'ReportController@getReport');
 });
