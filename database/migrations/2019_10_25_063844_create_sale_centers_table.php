@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateAgesReportsTable extends Migration
+class CreateSaleCentersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,9 @@ class CreateAgesReportsTable extends Migration
      */
     public function up()
     {
-        Schema::create('ages_reports', function (Blueprint $table) {
+        Schema::create('sale_centers', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('report_id');
-            $table->date('date');
-            $table->string('age');
-            $table->integer('sale_count');
-            $table->integer('payout_count');
-            $table->bigInteger('sum');
-            $table->bigInteger('lost_sum');
+            $table->string('name');
             $table->timestamps();
         });
     }
@@ -33,6 +27,6 @@ class CreateAgesReportsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ages_reports');
+        Schema::dropIfExists('sale_centers');
     }
 }

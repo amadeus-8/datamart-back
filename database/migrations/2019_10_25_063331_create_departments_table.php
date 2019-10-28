@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateGiftsReportsTable extends Migration
+class CreateDepartmentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,10 @@ class CreateGiftsReportsTable extends Migration
      */
     public function up()
     {
-        Schema::create('gifts_reports', function (Blueprint $table) {
+        Schema::create('departments', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('report_id');
-            $table->date('date');
             $table->string('name');
-            $table->integer('sale_count');
-            $table->integer('payout_count');
-            $table->bigInteger('sum');
-            $table->bigInteger('lost_sum');
+            $table->unsignedTinyInteger('region_id');
             $table->timestamps();
         });
     }
@@ -33,6 +28,6 @@ class CreateGiftsReportsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('gifts_reports');
+        Schema::dropIfExists('departments');
     }
 }

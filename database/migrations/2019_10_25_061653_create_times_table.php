@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateKBMReportsTable extends Migration
+class CreateTimesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,13 @@ class CreateKBMReportsTable extends Migration
      */
     public function up()
     {
-        Schema::create('k_b_m_reports', function (Blueprint $table) {
+        Schema::create('times', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('report_id');
             $table->date('date');
-            $table->string('isurance_class');
-            $table->integer('sale_count');
-            $table->integer('payout_count');
-            $table->bigInteger('sum');
-            $table->bigInteger('lost_sum');
+            $table->unsignedTinyInteger('day');
+            $table->unsignedTinyInteger('month');
+            $table->unsignedTinyInteger('year');
+            $table->enum('day_of_week', [1, 2, 3, 4, 5, 6, 7])->nullable();
             $table->timestamps();
         });
     }
@@ -33,6 +31,6 @@ class CreateKBMReportsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('k_b_m_reports');
+        Schema::dropIfExists('times');
     }
 }

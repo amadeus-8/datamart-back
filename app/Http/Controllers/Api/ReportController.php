@@ -33,11 +33,11 @@ class ReportController extends Controller
             'payout_count' => $reports->sum('payout_count'),
             'sum' => $reports->sum('sum'),
             'lost_sum' => $reports->sum('lost_sum'),
-            'products_report' => self::generateProductsReport(
-                                        $reports->pluck('productsReports')
-                                        ->flatten()
-                                        ->groupBy('name')
-                                 )
+//            'products_report' => self::generateProductsReport(
+//                                        $reports->pluck('productsReports')
+//                                        ->flatten()
+//                                        ->groupBy('name')
+//                                 )
         ];
     }
 

@@ -12,3 +12,9 @@
 */
 
 Auth::routes();
+
+Route::get('/', 'HomeController@index')->name('home');
+
+Route::resource('users', 'UserController');
+
+Route::post('/importReports', 'HomeController@feedFromFile')->name('feed_from_file');

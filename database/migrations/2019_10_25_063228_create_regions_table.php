@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateReferrersReportsTable extends Migration
+class CreateRegionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,9 @@ class CreateReferrersReportsTable extends Migration
      */
     public function up()
     {
-        Schema::create('referrers_reports', function (Blueprint $table) {
+        Schema::create('regions', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('report_id');
-            $table->date('date');
             $table->string('name');
-            $table->integer('sale_count');
-            $table->integer('payout_count');
-            $table->bigInteger('sum');
-            $table->bigInteger('lost_sum');
             $table->timestamps();
         });
     }
@@ -33,6 +27,6 @@ class CreateReferrersReportsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('referrers_reports');
+        Schema::dropIfExists('regions');
     }
 }
