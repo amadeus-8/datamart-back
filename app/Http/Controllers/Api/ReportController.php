@@ -2,37 +2,75 @@
 
 namespace App\Http\Controllers;
 
+use App\Order;
 use App\Report;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+
 
 class ReportController extends Controller
 {
     public function getreport(Request $request){
-        $reports = Report::where('date', '>=', $request->from)
-                        ->where('date', '<=', $request->to)
-                        ->with('productsReports',
-                            'referrersReports',
-                            'giftsReports',
-                            'agesReports',
-                            'territoriesReports',
-                            'KBMReports',
-                            'saleCentersReports'
-                        )->get();
+
+//        $filter_set = FilterSet::where('id', $request->filter_set->id)->first() ?? null;
+
+        // todo if isset filter set
+
+
+//        $query = Time::where('date', '>=', $request->from)
+//                ->where('date', '<=', $request->to);
+//
+//
+//        $orders = $query->with('orders')->get()->pluck('orders')->flatten();
+//
+//        if (isset($request->gender))
+//            $orders = $orders->whereHas('client', function (Builder $query) use ($request) {
+//                $query->where('gender', $request->gender);
+//            })->get();
+
+
+        $orders = Order::whereHas('time', function (Builder $query) use ($request){
+            $query->where('date', '>=', $request->from)->where('date', '<=', $request->to);
+        });
+
+        if (isset($request->gender) || isset($request->region_id)) // or city or age category
+            $orders = $orders->whereHas('client', function (Builder $query) use ($request) {
+                if(isset($request->gender))
+                    $query->where('gender', $request->gender);
+
+                if(isset($request->region_id))
+                    $query->where('region_id', $request->region_id);
+            });
 
         return response()->json([
-            'report' => self::generateReport($reports)
+            'general_report' => self::generateReport($orders->get())
         ]);
+//        $reports = Report::where('date', '>=', $request->from)
+//                        ->where('date', '<=', $request->to)
+//                        ->with('productsReports',
+//                            'referrersReports',
+//                            'giftsReports',
+//                            'agesReports',
+//                            'territoriesReports',
+//                            'KBMReports',
+//                            'saleCentersReports'
+//                        )->get();
     }
 
-    private static function generateReport($reports)
+    private static function generateReport($orders)
     {
         return [
-            'male_count' => $reports->sum('male_count'),
-            'female_count' => $reports->sum('female_count'),
-            'sale_count' => $reports->sum('sale_count'),
-            'payout_count' => $reports->sum('payout_count'),
-            'sum' => $reports->sum('sum'),
-            'lost_sum' => $reports->sum('lost_sum'),
+//            'male_count' => $orders->sum('male_count'),
+//            'female_count' => $reports->sum('female_count'),
+            'count' => count($orders),
+            'ogpo_vts_result' => $orders->sum('ogpo_vts_result'),
+            'vts_cross_result' => $orders->sum('vts_cross_result'),
+            'vts_overall_sum' => $orders->sum('vts_overall_sum'),
+            'payout_sum' => $orders->sum('payout_sum'),
+            'avg_sum' => $orders->sum('avg_sum'),
+            'avg_cross_result' => $orders->sum('avg_cross_result'),
+            'overall_lost_count' => $orders->sum('overall_lost_count'),
+            'vts_lost_count' => $orders->sum('vts_lost_count'),
 //            'products_report' => self::generateProductsReport(
 //                                        $reports->pluck('productsReports')
 //                                        ->flatten()

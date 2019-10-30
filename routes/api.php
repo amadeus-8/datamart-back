@@ -24,12 +24,15 @@ Route::group([
         'middleware' => 'auth:api'
     ], function () {
         Route::get('logout', 'AuthController@logout');
-        Route::get('user', 'AUthCOntroller@user');
+        Route::get('user', 'AuthController@user');
     });
 });
 
 Route::group([
     'middleware' => 'auth:api'
 ], function () {
-    Route::post('getreport', 'ReportController@getReport');
+    Route::post('get_general_report', 'ReportController@getReport');
+    Route::get('get_regions', function () {
+        return response()->json(\App\Region::select('id', 'name')->get());
+    });
 });

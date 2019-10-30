@@ -73,15 +73,14 @@ class Data extends Model
     ];
 
     const period_categories = [
-        'last_week', 'last_month', 'last_year'
+        'last_week', 'last_month', 'last_year', 'free'
     ];
 
-    public function getPeriod($period_category){
+    public static function getPeriod($period_category){
 
         switch ($period_category){
             case 'last_week':
-
-                break;
+                return self::getCurrentWeekRange();
 
             case 'last_month':
 
@@ -90,7 +89,7 @@ class Data extends Model
 
     }
 
-    public function getCurrentWeekRange(){
+    private static function getCurrentWeekRange(){
         $d = strtotime('today');
         $start_week = strtotime('last monday midnight', $d);
         $end_week = strtotime('next sunday', $d);

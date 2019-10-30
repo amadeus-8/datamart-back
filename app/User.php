@@ -71,7 +71,7 @@ class User extends Authenticatable
         return null !== $this->roles()->where('name', $role)->first();
     }
 
-    public function filter_set(){
+    public function filter_sets(){
         return $this->hasMany(FilterSet::class);
     }
 }
