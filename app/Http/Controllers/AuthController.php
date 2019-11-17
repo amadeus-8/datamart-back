@@ -67,11 +67,6 @@ class AuthController extends Controller
      */
     public function user(Request $request)
     {
-        $user = $request->user();
-
-        return response()->json([
-            'user' => $user,
-            'filtersets' => FilterSet::where('name', 'default')->get()->merge($user->filter_sets)
-        ]);
+        return response()->json($request->user());
     }
 }
