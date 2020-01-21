@@ -35,6 +35,7 @@ class HomeController extends Controller
 //        dd($rows[3]);
 
         //loop through file and split every 1000 lines
+
         $parts = (array_chunk($rows, 500));
         $i = 1;
         foreach($parts as $part) {

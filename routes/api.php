@@ -30,6 +30,7 @@ Route::group([
 
 Route::group([
     'middleware' => 'auth:api'
+
 ], function () {
     Route::post('get_general_report', 'ReportController@getReport');
 
@@ -40,7 +41,7 @@ Route::group([
     Route::post('get_sale_centers_report_data', 'ReportController@getSaleCentersReport');
 
     Route::get('get_regions', function () {
-        return response()->json(\App\Region::select('id', 'name')->get());
+        return response()->json(\App\Region::select('id', 'name')->orderBy('name')->get());
     });
 
     Route::get('get_filtersets', function (Request $request) {
@@ -50,8 +51,8 @@ Route::group([
     Route::get('get_vehicle_filters', function (Request $request) {
         return response()->json([
             'year_categories' => \App\VehicleYearCategory::select('id','category')->get(),
-            'brands' => \App\VehicleBrand::select('id', 'name')->get(),
-            'models' => \App\VehicleModel::select('id', 'name')->get()
+            'brands' => \App\VehicleBrand::select('id', 'name')->orderBy('name')->get(),
+            'models' => \App\VehicleModel::select('id', 'name')->orderBy('name')->get()
         ]);
     });
 
@@ -60,8 +61,15 @@ Route::group([
 //            'agents' => \App\Agent::all(),
             'referrers' => \App\Referrer::select('id', 'name')->get(),
             'departments' => \App\Department::select('id', 'name')->get(),
-            'sale_channels' => \App\SaleCenter::select('id', 'name')->get(),
-            'sale_centers' => \App\SaleChannel::select('id', 'name')->get()
+            'sale_channels' => \App\SaleCenter::select('id', 'name')->orderBy('name')->get(),
+            'sale_centers' => \App\SaleChannel::select('id', 'name')->orderBy('name')->get()
        ]);
     });
+
+    Route::post('/set_filterset', 'ReportController@setFilterSet');
+
+    //Route::post('/create_summary_table', 'ReportController@createSummaryTable');
+    Route::post('/create_summary_table', 'ReportController@getReport');
+
+
 });

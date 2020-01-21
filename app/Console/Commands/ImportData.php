@@ -199,7 +199,7 @@ class ImportData extends Command
         $order = new Order();
 
         foreach ( Data::MAP_FIELDS as $key => $field ) {
-
+//            dd($line);
             if( $line[$field] == '' )
                 continue;
 
