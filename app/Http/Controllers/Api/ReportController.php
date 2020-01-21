@@ -82,37 +82,36 @@ class ReportController extends Controller
         $payout_sums = [];
         $payout_counts = [];
         $cross_sums = [];
+        $regionss = [];
+        $property = '';
 
 
-        $age = array(   // 20/30/40
-            $regions[20] => array(   // Almaty/Astana/Shymkent
-                'Almaty' => 2000000,
-                'Almaty' => 2000000,
-            ),
-            $regions[30] => array(   // Almaty/Astana/Shymkent
-                'Almaty' => 2000000,
-                'Almaty' => 2000000,
-            ),
-            $regions[40] => array(   // Almaty/Astana/Shymkent
-                'Almaty' => 2000000,
-                'Almaty' => 2000000,
-            )
-        );
-
-        $region = array(
-            $age[Almaty] => array(   // Almaty/Astana/Shymkent
-                'ogpoVts' => 2000000,
-                'ogpoVts' => 2000000,
-            ),
-            $age[Astana] => array(   // Almaty/Astana/Shymkent
-                'ogpoVts' => 2000000,
-                'ogpoVts' => 2000000,
-            ),
-            $age[Shymkent] => array(   // Almaty/Astana/Shymkent
-                'ogpoVts' => 2000000,
-                'ogpoVts' => 2000000,
-            )
-        );
+//        $age = array(   // 20/30/40
+//            $regions[20] => array(   // Almaty/Astana/Shymkent
+//                'Almaty' => 2000000,
+//                'Almaty' => 2000000,
+//            ),
+//            $regions[30] => array(   // Almaty/Astana/Shymkent
+//                'Almaty' => 2000000,
+//                'Almaty' => 2000000,
+//            ),
+//            $regions[40] => array(   // Almaty/Astana/Shymkent
+//                'Almaty' => 2000000,
+//                'Almaty' => 2000000,
+//            )
+//        );
+//
+//        $region[Almaty] = array(
+//            $age[30] => array(   // Almaty/Astana/Shymkent
+//                'ogpoVts' => 2000000,
+//            ),
+//            $age[Astana] => array(   // Almaty/Astana/Shymkent
+//                'ogpoVts' => 2000000,
+//            ),
+//            $age[Shymkent] => array(   // Almaty/Astana/Shymkent
+//                'ogpoVts' => 2000000,
+//            )
+//        );
 
         foreach ($regions as $region) {
             $request->region_id = $region->id;
@@ -127,16 +126,18 @@ class ReportController extends Controller
 
             //dd($orders);
             foreach($orders as $key => $ordersgroup) {
+                  $sums[$key] =  self::numberFormat($ordersgroup->sum('vts_overall_sum'));
+
 //                $ages[$key] = arraypush(
 //                    'labels' => $region->name
 //                );
-                $labels[$key] = $region->name;
-                $counts[$key] =  count($orders);
-                $sums[$key] =  self::numberFormat($orders->sum('vts_overall_sum'));
-                $avgs[$key] =  self::numberFormat($orders->sum('avg_sum'));
-                $payout_counts[$key] =  self::numberFormat($orders->sum('vts_lost_count'));
-                $payout_sums[$key] =  self::numberFormat($orders->sum('payout_sum'));
-                $cross_sums[$key] =  self::numberFormat($orders->sum('vts_cross_result'));
+//                $labels[$key] = $region->name;
+//                $counts[$key] =  count($orders);
+//                $sums[$key] =  self::numberFormat($orders->sum('vts_overall_sum'));
+//                $avgs[$key] =  self::numberFormat($orders->sum('avg_sum'));
+//                $payout_counts[$key] =  self::numberFormat($orders->sum('vts_lost_count'));
+//                $payout_sums[$key] =  self::numberFormat($orders->sum('payout_sum'));
+//                $cross_sums[$key] =  self::numberFormat($orders->sum('vts_cross_result'));
 
 //                array_push($labels, $region->name);
 //                array_push($counts, count($orders));
@@ -145,15 +146,26 @@ class ReportController extends Controller
 //                array_push($payout_counts, self::numberFormat($orders->sum('vts_lost_count')));
 //                array_push($payout_sums, self::numberFormat($orders->sum('payout_sum')));
 //                array_push($cross_sums, self::numberFormat($orders->sum('vts_cross_result')));
+                if(!in_array($key,$labels)) {
+                    array_push($labels, $key);
+                }
             }
+            $regionss[$region->name] = array(
+                'sums' => $sums
+            );
+
+
+
         }
 //        $orders = self::getFilteredOrdersQuery($request);
 
 //        $orders->with(['client' => function($q){
 //            $q->groupBy('age_category');
 //        }]); //->groupBy('age_category');
-
+        $property = 'Город';
         return response()->json([
+            'property' => $property,
+            'data' => $regionss,
             'labels' => $labels,
             //'ages' => $ages,
             'counts' => $counts,
@@ -215,11 +227,11 @@ class ReportController extends Controller
 
         //$orders = $orders->get();
 
-//        if (isset($request->gender) && $request->gender != null
-//            || isset($request->region_id) && $request->region_id != null
-//            || ( isset($request->insurance_class) && $request->insurance_class != 'все' && $request->insurance_class != null)
-//            || ( isset($request->age_category) && $request->age_category !== 'все' && $request->age_category != null))
-//            $orders = self::filterByClient($orders,$request);
+        if (isset($request->gender) && $request->gender != null
+            || isset($request->region_id) && $request->region_id != null
+            || ( isset($request->insurance_class) && $request->insurance_class != 'все' && $request->insurance_class != null)
+            || ( isset($request->age_category) && $request->age_category !== 'все' && $request->age_category != null))
+            $orders = self::filterByClient($orders,$request);
 
         if (isset($request->vehicle_year_category) && $request->vehicle_year_category != null
             || isset($request->vehicle_brand) && $request->vehicle_brand != null
