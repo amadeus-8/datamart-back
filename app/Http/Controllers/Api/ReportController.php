@@ -351,16 +351,35 @@ class ReportController extends Controller
 //                //$query->whereHas('region')->groupBy('clients.region_id');
 //                //$query->groupBy('regions.name');
 //            })
-//            ->select('orders.ogpo_vts_result')
-////            $query->selectRaw('
-////                SUM(orders.vts_overall_sum) AS sum,
-////                COUNT(orders.id) AS count
-////            ');
-            ->get()
-            ->groupBy(['region.name','client.age_category']);  //,'client.region_id'
+                //->select('orders.ogpo_vts_result')
+//            ->selectRaw('
+//                SUM(vts_overall_sum) AS sumssssssss,
+//                COUNT(id) AS countccccccc
+//            ')
+
+            ->get();
+            //->groupBy(['region_name','age_category']);
+
+            //->groupBy(['region.name','client.age_category']);  //,'client.region_id'
         // 2 varianta: 1) summirovat ili ne podklyachat region i age_category - no togda nado budet
-            //->groupBy(['region_id','client_id']);
-            //->groupBy(['client_id','region_id']);
+
+            //->groupBy(['region_id','age_category']);
+
+//            ->groupBy('age_category')
+//            ->selectRaw('sum(vts_overall_sum) as sum, age_category')
+//            //->groupBy(['region_id','age_category'])
+//            ->pluck('sum','age_category');
+
+            //->get()->groupBy(['age_category','region_name']);
+
+//            ->groupBy('region_name')
+//            ->selectRaw('*, sum(vts_overall_sum) as sum')
+//            ->get();
+
+
+
+
+        //->groupBy(['client_id','region_id']);
         //dd($orders);
         //print '<pre>'; print_r($orders); print '</pre>'; exit();
         //$query->Join('regions','regions.id','=','clients.region_id'); //->groupBy('clients.region_id');.
@@ -454,7 +473,19 @@ class ReportController extends Controller
         $regionss = [];
         $property = '';
 print 'sql';
-        $orders = self::getFilteredOrdersQuery($request)->get();
+        $orders = self::getFilteredOrdersQuery($request)
+            ->whereHas('client',function ($query) use ($data){
+                //...
+                //$query->groupBy('clients.region_id');
+                //$query->whereHas('region')->groupBy('clients.region_id');
+            })
+            ->whereHas('region',function ($query) use ($data){
+                //...
+                //$query->groupBy('clients.region_id');
+                //$query->whereHas('region')->groupBy('clients.region_id');
+                //$query->groupBy('regions.name');
+            })
+        ->get();
         $i = 0;
 
         foreach($orders as $order){
@@ -462,7 +493,7 @@ print 'sql';
             //exit();
             $or = Order::find($order->id);
             print 'Обновление записи №'.$order->id.'- age_category = '.$order->client->age_category.'<br>, Пожалуйста подождите ...';
-            $or->age_category = $order->client->age_category;
+            $or->region_name = $order->region->name;
             $or->update();
             print 'Запись обновлена №'.$order->id.'- age_category = '.$order->client->age_category.'<br>,';
             $i++;
