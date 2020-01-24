@@ -293,7 +293,7 @@ class ReportController extends Controller
 
 
     public function getTest(Request $request) {
-        //print 'test';exit();
+        print 'test';exit();
         ini_set('max_execution_time', 900);
         if($request->region_id != null && $request->region_id != 'все'){
             $regions[0] = Region::findOrFail($request->region_id);
@@ -357,8 +357,8 @@ class ReportController extends Controller
 //                COUNT(id) AS countccccccc
 //            ')
 
-            ->get();
-            //->groupBy(['region_name','age_category']);
+            //->get();
+            ->groupBy(['region_name','age_category'])->sum('vts_overall_sum');
 
             //->groupBy(['region.name','client.age_category']);  //,'client.region_id'
         // 2 varianta: 1) summirovat ili ne podklyachat region i age_category - no togda nado budet
