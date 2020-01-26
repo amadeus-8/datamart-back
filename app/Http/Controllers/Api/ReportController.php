@@ -572,41 +572,40 @@ exit();*/
 
         //$orders = $orders->get();
 
-//        if (isset($request->gender) && $request->gender != null
-//            || isset($request->region_id) && $request->region_id != null
-//            || ( isset($request->insurance_class) && $request->insurance_class != 'все' && $request->insurance_class != null)
-//            || ( isset($request->age_category) && $request->age_category !== 'все' && $request->age_category != null))
-//            $orders = self::filterByClient($orders,$request);
+        if (isset($request->gender) && $request->gender != null
+            || isset($request->region_id) && $request->region_id != null
+            || ( isset($request->insurance_class) && $request->insurance_class != 'все' && $request->insurance_class != null)
+            || ( isset($request->age_category) && $request->age_category !== 'все' && $request->age_category != null))
+            $orders = self::filterByClient($orders,$request);
 
-//        if (isset($request->vehicle_year_category) && $request->vehicle_year_category != null
-//            || isset($request->vehicle_brand) && $request->vehicle_brand != null
-//            || isset($request->vehicle_model) && $request->vehicle_model != null)
-//            $orders = self::filterByVehicle($request, $orders);
+        if (isset($request->vehicle_year_category) && $request->vehicle_year_category != null
+            || isset($request->vehicle_brand) && $request->vehicle_brand != null
+            || isset($request->vehicle_model) && $request->vehicle_model != null)
+            $orders = self::filterByVehicle($request, $orders);
 
-//        if (isset($request->sale_center) && $request->sale_center != null)
-//            $orders = $orders->where('sale_center_id', $request->sale_center);
-//
-//        if(isset($request->sale_channel) && $request->sale_channel != '')
-//            $orders = $orders->where('sale_channel_id', $request->sale_channel);
-//
-//        if(isset($request->referrer) && $request->referrer != null)
-//            $orders = $orders->where('referrer_id', $request->referrer);
-//
-//        if(isset($request->department) && $request->department != null)
-//            $orders = $orders->where('department_id', $request->department);
+        if (isset($request->sale_center) && $request->sale_center != null)
+            $orders = $orders->where('sale_center_id', $request->sale_center);
+
+        if(isset($request->sale_channel) && $request->sale_channel != '')
+            $orders = $orders->where('sale_channel_id', $request->sale_channel);
+
+        if(isset($request->referrer) && $request->referrer != null)
+            $orders = $orders->where('referrer_id', $request->referrer);
+
+        if(isset($request->department) && $request->department != null)
+            $orders = $orders->where('department_id', $request->department);
 
         return $orders;
     }
 
     private function filterOrdersByTime($request) {
         return Order::whereHas('time', function ($query) use ($request){
-            //$query->where('date', '>=', $request->from)->where('date', '<=', $request->to);
-//            if(isset($request->from_date)) {
-//                $query->whereBetween('date', [$request->from_date, $request->to_date]);
-//            }
-            //if(isset($request->from)) {
-                $query->whereBetween('date', ['2018.05.01', '2019.12.30']);   //[$request->from, $request->to]);
-            //}
+            if(isset($request->from_date)) {
+                $query->whereBetween('date', [$request->from_date, $request->to_date]);
+            }
+            if(isset($request->from)) {
+                $query->whereBetween('date', [$request->from, $request->to]);
+            }
         });
     }
 
