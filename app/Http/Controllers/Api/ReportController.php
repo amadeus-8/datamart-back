@@ -454,7 +454,7 @@ class ReportController extends Controller
 
 
     public function getTest2(Request $request) {
-        ini_set('max_execution_time', 1500000000);
+       /* ini_set('max_execution_time', 1500000000);
         $data = [];
         $labels = [];
         $sums = [];
@@ -467,12 +467,12 @@ class ReportController extends Controller
                 //$query->groupBy('clients.region_id');
                 //$query->whereHas('region')->groupBy('clients.region_id');
             })
-            ->whereHas('region',function ($query) use ($data){
-                //...
-                //$query->groupBy('clients.region_id');
-                //$query->whereHas('region')->groupBy('clients.region_id');
-                //$query->groupBy('regions.name');
-            })
+//            ->whereHas('region',function ($query) use ($data){
+//                //...
+//                //$query->groupBy('clients.region_id');
+//                //$query->whereHas('region')->groupBy('clients.region_id');
+//                //$query->groupBy('regions.name');
+//            })
         ->get();
         $i = 0;
 print 'Count:'.count($orders).'; ';
@@ -480,19 +480,42 @@ print 'Count:'.count($orders).'; ';
             //print '<pre>';print_r($order);print '</pre>';
             //exit();
             //print $order->client->region->name;exit();
+            if($order->client->age_category == '20-25'){
+                $age_id = 1;
+            }
+            if($order->client->age_category == '26-34'){
+                $age_id = 2;
+            }
+            if($order->client->age_category == '35-44'){
+                $age_id = 3;
+            }
+            if($order->client->age_category == '45-54'){
+                $age_id = 4;
+            }
+            if($order->client->age_category == '55-64'){
+                $age_id = 5;
+            }
+            if($order->client->age_category == 'старше 64'){
+                $age_id = 6;
+            }
+            if($order->client->age_category == 'младше 20'){
+                $age_id = 7;
+            }
+
+
             $or = Order::find($order->id);
             print 'Обновление записи №'.$order->id.'- age_category = '.$order->client->age_category.'<br>, Пожалуйста подождите ...';
-            $or->region_id = $order->client->region_id;
-            $or->region_name = $order->client->region->name;
-            $or->age_category = $order->client->age_category;
+            $or->region_d = $order->client->region_id;
+            $or->age_category_name = $order->client->age_category;
+            $or->age_id = $age_id;
             $or->update();
-            print 'Запись обновлена №'.$order->id.'- age_category = '.$order->client->age_category.'<br>,';
+            print 'Запись обновлена №'.$order->id.'- age_category = '.$order->client->age_category.'---'.$age_id.'<br>,';
             $i++;
             //exit();
         }
         print 'end time-'.date('Y.m.d H:i:s');
 
-exit();
+exit();*/
 
     }
 
@@ -582,7 +605,7 @@ exit();
 //                $query->whereBetween('date', [$request->from_date, $request->to_date]);
 //            }
             //if(isset($request->from)) {
-                $query->whereBetween('date', ['2018.01.01', '2018.01.30']);   //[$request->from, $request->to]);
+                $query->whereBetween('date', ['2018.05.01', '2019.12.30']);   //[$request->from, $request->to]);
             //}
         });
     }
@@ -777,7 +800,7 @@ exit();
                     $items = Region::all();
                 }
                 $data[0] = $items;
-                $data[1] = 'region_id';
+                $data[1] = 'region_d';
             break;
             case 'age':
                 if($request->age_category != null && $request->age_category != 'все'){
@@ -786,7 +809,7 @@ exit();
                     $items = Age::all();
                 }
                 $data[0] = $items;
-                $data[1] = 'age_category';
+                $data[1] = 'age_id';
             break;
             case 'sale_center':
                 if($request->sale_center != null && $request->sale_center != 'все'){
@@ -840,27 +863,11 @@ exit();
     public function getWorkedReport(Request $request) {
         ini_set('max_execution_time', 15000);
 
-//        $filterData = self::getFilterData('age',$request);
-//        $vertical = $filterData[0];
-//        $verticalQuery = $filterData[1];
-//
-//        $filterData = self::getFilterData('region',$request);
-//        $horizontal = $filterData[0];
-//        $horizontalQuery = $filterData[1];
-
-//        $filterData = self::getFilterData('sale_channel',$request);
-//        $horizontal = $filterData[0];
-//        $horizontalQuery = $filterData[1];
-
-//        $filterData = self::getFilterData('sale_center',$request);
-//        $vertical = $filterData[0];
-//        $verticalQuery = $filterData[1];
-
         $filterData = self::getFilterData('region',$request);
         $vertical = $filterData[0];
         $verticalQuery = $filterData[1];
 
-        $filterData = self::getFilterData('agent',$request);
+        $filterData = self::getFilterData('age',$request);
         $horizontal = $filterData[0];
         $horizontalQuery = $filterData[1];
 

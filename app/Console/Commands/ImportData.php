@@ -154,7 +154,7 @@ class ImportData extends Command
         // insert region
         $region = Region::where('name', $line[Data::MAP_FIELDS['city']])->first()
             ?? Region::create(['name' => $line[Data::MAP_FIELDS['city']]]);
-        $order->region_id = $region->id;
+        $order->region_d = $region->id;
 
         // insert age
         $age = Age::where('name', $line[Data::MAP_FIELDS['age_category']])->first()
@@ -172,7 +172,7 @@ class ImportData extends Command
             'region_id' => $region->id
         ]);
         $order->client_id = $client->id;
-        $order->age_category = $client->age_category;
+        $order->age_category_name = $client->age_category;
 
         // insert department
         if ( $line[Data::MAP_FIELDS['department']] != '' ) {
