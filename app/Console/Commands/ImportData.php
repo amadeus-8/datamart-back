@@ -10,6 +10,7 @@ use App\Gift;
 use App\Order;
 use App\Referrer;
 use App\Region;
+use App\Age;
 use App\SaleCenter;
 use App\SaleChannel;
 use App\Time;
@@ -154,6 +155,11 @@ class ImportData extends Command
         $region = Region::where('name', $line[Data::MAP_FIELDS['city']])->first()
             ?? Region::create(['name' => $line[Data::MAP_FIELDS['city']]]);
         $order->region_id = $region->id;
+
+        // insert age
+        $age = Age::where('name', $line[Data::MAP_FIELDS['age_category']])->first()
+            ?? Age::create(['name' => $line[Data::MAP_FIELDS['age_category']]]);
+        $order->age_id = $age->id;
 
         // insert client
         $client = Client::where('isn', $line[Data::MAP_FIELDS['isn']])->first()

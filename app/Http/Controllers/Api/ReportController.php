@@ -4,9 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Order;
 use App\Region;
+use App\Age;
 use App\Client;
 use App\Report;
 use App\SaleCenter;
+use App\Department;
+use App\SaleChannel;
+use App\Referrer;
+use App\Agent;
 use App\Time;
 use function foo\func;
 use Illuminate\Database\Eloquent\Builder;
@@ -149,11 +154,11 @@ class ReportController extends Controller
             $request->region_id = $region->id;
             $orders = self::getFilteredOrdersQuery($request)
                 //->with('client')//->where('id',$request->age_category)
-                ->whereHas('client', function ($query) use ($request){
-                    if($request->age_category != 2 && $request->age_category != 'все' && $request->age_category != null) {
-                        $query->where('age_category', '=', $request->age_category);
-                    }
-                })
+//                ->whereHas('client', function ($query) use ($request){
+//                    if($request->age_category != 2 && $request->age_category != 'все' && $request->age_category != null) {
+//                        $query->where('age_category', '=', $request->age_category);
+//                    }
+//                })
                 ->get()
                 ->groupBy('client.age_category');
             foreach($orders as $key => $ordersgroup) {
@@ -172,6 +177,8 @@ class ReportController extends Controller
             );
         }
 
+        print '<pre>'; print_r($regionss); print '</pre>';
+
         $property = 'Город';
         return response()->json([
             'property' => $property,
@@ -183,52 +190,7 @@ class ReportController extends Controller
     }
 
     public function getAgesReport(Request $request) {
-//        ini_set('max_execution_time', 900);
-//        if($request->age_category != null && $request->age_category != 'все'){
-//            $vertical[0] = Client::findOrFail($request->age_category);
-//        } else {
-//            $vertical = Client::all();
-//        }
-//        $labels = [];
-//        $sums = [];
-//        $regionss = [];
-//        $property = '';
-//        foreach ($vertical as $v) {
-//            $request->age_category = $v->id;
-//            $orders = self::getFilteredOrdersQuery($request)
-//                //->with('client')//->where('id',$request->age_category)
-//                ->whereHas('client', function ($query) use ($request){
-//                    if($request->age_category != 2 && $request->age_category != 'все' && $request->age_category != null) {
-//                        $query->where('age_category', '=', $request->age_category);
-//                    }
-//                    $query->whereHas('region', function ($query) use ($request){
-//                        if($request->region_id != 2 && $request->region_id != 'все' && $request->region_id != null) {
-//                            $query->where('id', '=', $request->region_id);
-//                        }
-//                    });
-//                })
-//                ->get()
-//                ->groupBy('region.id');
-//            foreach($orders as $key => $ordersgroup) {
-//                $sums[$key] =  self::numberFormat($ordersgroup->sum('vts_overall_sum'));
-//                if(!in_array($key,$labels)) {
-//                    array_push($labels, $key);
-//                }
-//            }
-//            $regionss[$v->name] = array(
-//                'sums' => $sums
-//            );
-//        }
-//
-//        $property = 'Возраст';
-//        return response()->json([
-//            'property' => $property,
-//            'data' => $regionss,
-//            'labels' => $labels,
-//            'sums' => $sums
-//        ]);
-
-        ini_set('max_execution_time', 900);
+        ini_set('max_execution_time', 15000);
         if($request->region_id != null && $request->region_id != 'все'){
             $regions[0] = Region::findOrFail($request->region_id);
         } else {
@@ -271,6 +233,8 @@ class ReportController extends Controller
             }
         }
 
+        print '<pre>';print_r($regionss);print '</pre>'; exit();
+
         $property = 'Возраст';
         return response()->json([
             'property' => $property,
@@ -280,6 +244,30 @@ class ReportController extends Controller
         ]);
 
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -466,13 +454,13 @@ class ReportController extends Controller
 
 
     public function getTest2(Request $request) {
-        ini_set('max_execution_time', 900);
+        ini_set('max_execution_time', 1500000000);
         $data = [];
         $labels = [];
         $sums = [];
         $regionss = [];
         $property = '';
-print 'sql';
+        print 'sql';
         $orders = self::getFilteredOrdersQuery($request)
             ->whereHas('client',function ($query) use ($data){
                 //...
@@ -487,18 +475,22 @@ print 'sql';
             })
         ->get();
         $i = 0;
-
+print 'Count:'.count($orders).'; ';
         foreach($orders as $order){
             //print '<pre>';print_r($order);print '</pre>';
             //exit();
+            //print $order->client->region->name;exit();
             $or = Order::find($order->id);
             print 'Обновление записи №'.$order->id.'- age_category = '.$order->client->age_category.'<br>, Пожалуйста подождите ...';
-            $or->region_name = $order->region->name;
+            $or->region_id = $order->client->region_id;
+            $or->region_name = $order->client->region->name;
+            $or->age_category = $order->client->age_category;
             $or->update();
             print 'Запись обновлена №'.$order->id.'- age_category = '.$order->client->age_category.'<br>,';
             $i++;
+            //exit();
         }
-
+        print 'end time-'.date('Y.m.d H:i:s');
 
 exit();
 
@@ -590,7 +582,7 @@ exit();
 //                $query->whereBetween('date', [$request->from_date, $request->to_date]);
 //            }
             //if(isset($request->from)) {
-                $query->whereBetween('date', ['2019.04.01', '2019.04.30']);   //[$request->from, $request->to]);
+                $query->whereBetween('date', ['2018.01.01', '2018.01.30']);   //[$request->from, $request->to]);
             //}
         });
     }
@@ -771,4 +763,147 @@ exit();
 
         return $result;
     }
+
+
+
+
+    private function getFilterData($filter,$request){
+        $data = [];
+        switch($filter){
+            case 'region':
+                if ($request->region_id != null && $request->region_id != 'все') {
+                    $items[0] = Region::findOrFail($request->region_id);
+                } else {
+                    $items = Region::all();
+                }
+                $data[0] = $items;
+                $data[1] = 'region_id';
+            break;
+            case 'age':
+                if($request->age_category != null && $request->age_category != 'все'){
+                    $items[0] = Age::findOrFail($request->age_category);
+                } else {
+                    $items = Age::all();
+                }
+                $data[0] = $items;
+                $data[1] = 'age_category';
+            break;
+            case 'sale_center':
+                if($request->sale_center != null && $request->sale_center != 'все'){
+                    $items[0] = SaleCenter::findOrFail($request->sale_center);
+                } else {
+                    $items = SaleCenter::all();
+                }
+                $data[0] = $items;
+                $data[1] = 'sale_center_id';
+            break;
+            case 'sale_channel':
+                if($request->sale_channel != null && $request->sale_channel != 'все'){
+                    $items[0] = SaleChannel::findOrFail($request->sale_channel);
+                } else {
+                    $items = SaleChannel::all();
+                }
+                $data[0] = $items;
+                $data[1] = 'sale_channel_id';
+            break;
+            case 'department':
+                if($request->department != null && $request->department != 'все'){
+                    $items[0] = Department::findOrFail($request->department);
+                } else {
+                    $items = Department::all();
+                }
+                $data[0] = $items;
+                $data[1] = 'department_id';
+            break;
+            case 'referrer':
+                if($request->referrer != null && $request->referrer != 'все'){
+                    $items[0] = Referrer::findOrFail($request->referrer);
+                } else {
+                    $items = Referrer::all();
+                }
+                $data[0] = $items;
+                $data[1] = 'referrer_id';
+            break;
+            case 'agent':
+                if($request->agent != null && $request->agent != 'все'){
+                    $items[0] = Agent::findOrFail($request->agent);
+                } else {
+                    $items = Agent::all();
+                }
+                $data[0] = $items;
+                $data[1] = 'agent_id';
+            break;
+        }
+        return $data;
+    }
+
+    public function getWorkedReport(Request $request) {
+        ini_set('max_execution_time', 15000);
+
+//        $filterData = self::getFilterData('age',$request);
+//        $vertical = $filterData[0];
+//        $verticalQuery = $filterData[1];
+//
+//        $filterData = self::getFilterData('region',$request);
+//        $horizontal = $filterData[0];
+//        $horizontalQuery = $filterData[1];
+
+//        $filterData = self::getFilterData('sale_channel',$request);
+//        $horizontal = $filterData[0];
+//        $horizontalQuery = $filterData[1];
+
+//        $filterData = self::getFilterData('sale_center',$request);
+//        $vertical = $filterData[0];
+//        $verticalQuery = $filterData[1];
+
+        $filterData = self::getFilterData('region',$request);
+        $vertical = $filterData[0];
+        $verticalQuery = $filterData[1];
+
+        $filterData = self::getFilterData('agent',$request);
+        $horizontal = $filterData[0];
+        $horizontalQuery = $filterData[1];
+
+        $data = [];
+        $labels = [];
+        $property = '';
+        foreach ($vertical as $v) {
+            $sums = [];
+            $count = [];
+            foreach($horizontal as $h){
+                $order = self::getFilteredOrdersQuery($request)
+                    ->where($verticalQuery,$v->id)
+                    ->where($horizontalQuery,$h->id)
+//                    ->whereHas('client', function ($query) use ($h,$v,$horizsontalQuery){
+//                        $query->where($horizsontalQuery, $h->name);
+//                    })
+                    ->selectRaw('sum(orders.vts_overall_sum) as sum, count(orders.vts_overall_sum) as count')
+                    ->get();
+
+                if(isset($order[0]->sum)) {
+                    $sums[$h->name] = $order[0]->sum;
+                } else {
+                    $sums[$h->name] = 0;
+                }
+                $count[$h->name] = $order[0]->count;
+
+                if(!in_array($h->name,$labels)) {
+                    array_push($labels, $h->name);
+                }
+            }
+
+            //$data[$v->name] = array('sum'=>$sums,'count' => $count);
+            $data[$v->name] = $sums;
+        }
+
+        print '<pre>';print_r($data);print '</pre>';exit();
+
+        $property = 'Возраст';
+        return response()->json([
+            'property' => $property,
+            'data' => $data,
+            'labels' => $labels,
+        ]);
+    }
+
 }

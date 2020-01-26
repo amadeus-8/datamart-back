@@ -18,8 +18,9 @@ Route::get('/', 'HomeController@index')->name('home');
 Route::resource('users', 'UserController');
 
 Route::post('/importReports', 'HomeController@feedFromFile')->name('feed_from_file');
-Route::get('/test', 'ReportController@getTest');
+Route::get('/test', 'ReportController@getWorkedReport');
 Route::get('/test2', 'ReportController@getTest2');
+
 
 //Route::get('getkbms', function () {
 //    foreach (App\Client::select('insurance_class')->groupBy('insurance_class')->get() as $kbm) {
