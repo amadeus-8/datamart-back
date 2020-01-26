@@ -801,6 +801,7 @@ exit();*/
                 }
                 $data[0] = $items;
                 $data[1] = 'region_d';
+                $data[2] = 'Город';
             break;
             case 'age':
                 if($request->age_category != null && $request->age_category != 'все'){
@@ -810,6 +811,7 @@ exit();*/
                 }
                 $data[0] = $items;
                 $data[1] = 'age_id';
+                $data[2] = 'Возраст';
             break;
             case 'sale_center':
                 if($request->sale_center != null && $request->sale_center != 'все'){
@@ -819,6 +821,7 @@ exit();*/
                 }
                 $data[0] = $items;
                 $data[1] = 'sale_center_id';
+                $data[2] = 'Центр продаж';
             break;
             case 'sale_channel':
                 if($request->sale_channel != null && $request->sale_channel != 'все'){
@@ -828,6 +831,7 @@ exit();*/
                 }
                 $data[0] = $items;
                 $data[1] = 'sale_channel_id';
+                $data[2] = 'Канал продаж';
             break;
             case 'department':
                 if($request->department != null && $request->department != 'все'){
@@ -837,6 +841,7 @@ exit();*/
                 }
                 $data[0] = $items;
                 $data[1] = 'department_id';
+                $data[2] = 'Департамент';
             break;
             case 'referrer':
                 if($request->referrer != null && $request->referrer != 'все'){
@@ -846,6 +851,7 @@ exit();*/
                 }
                 $data[0] = $items;
                 $data[1] = 'referrer_id';
+                $data[2] = 'Referrer';
             break;
             case 'agent':
                 if($request->agent != null && $request->agent != 'все'){
@@ -855,6 +861,7 @@ exit();*/
                 }
                 $data[0] = $items;
                 $data[1] = 'agent_id';
+                $data[2] = 'Агенты';
             break;
         }
         return $data;
@@ -862,14 +869,23 @@ exit();*/
 
     public function getWorkedReport(Request $request) {
         ini_set('max_execution_time', 15000);
+        $firstFilter = 'region';
+        if($request->firstFilter && $request->firstFilter != ''){
+            $firstFilter = $request->firstFilter;
+        }
 
-        $filterData = self::getFilterData('region',$request);
+        $filterData = self::getFilterData($firstFilter,$request);
         $vertical = $filterData[0];
         $verticalQuery = $filterData[1];
+        $property = $filterData[2];
 
-        $filterData = self::getFilterData('age',$request);
-        $horizontal = $filterData[0];
-        $horizontalQuery = $filterData[1];
+        if($request->secondtFilter && $request->secondtFilter != '') {
+            $filterData = self::getFilterData($request->secondtFilter, $request);
+            $horizontal = $filterData[0];
+            $horizontalQuery = $filterData[1];
+        } else {
+            $horizontal = [];
+        }
 
         $data = [];
         $labels = [];
@@ -877,26 +893,41 @@ exit();*/
         foreach ($vertical as $v) {
             $sums = [];
             $count = [];
-            foreach($horizontal as $h){
-                $order = self::getFilteredOrdersQuery($request)
-                    ->where($verticalQuery,$v->id)
-                    ->where($horizontalQuery,$h->id)
-//                    ->whereHas('client', function ($query) use ($h,$v,$horizsontalQuery){
-//                        $query->where($horizsontalQuery, $h->name);
-//                    })
-                    ->selectRaw('sum(orders.vts_overall_sum) as sum, count(orders.vts_overall_sum) as count')
-                    ->get();
+            if(count($horizontal) > 0) {
+                foreach ($horizontal as $h) {
+                    $order = self::getFilteredOrdersQuery($request)
+                        ->where($verticalQuery, $v->id)
+                        ->where($horizontalQuery, $h->id)
+                        //                    ->whereHas('client', function ($query) use ($h,$v,$horizsontalQuery){
+                        //                        $query->where($horizsontalQuery, $h->name);
+                        //                    })
+                        ->selectRaw('sum(orders.vts_overall_sum) as sum, count(orders.vts_overall_sum) as count')
+                        ->get();
 
-                if(isset($order[0]->sum)) {
-                    $sums[$h->name] = $order[0]->sum;
-                } else {
-                    $sums[$h->name] = 0;
-                }
-                $count[$h->name] = $order[0]->count;
+                    if (isset($order[0]->sum)) {
+                        $sums[$h->name] = $order[0]->sum;
+                    } else {
+                        $sums[$h->name] = 0;
+                    }
+                    $count[$h->name] = $order[0]->count;
 
-                if(!in_array($h->name,$labels)) {
-                    array_push($labels, $h->name);
+                    if (!in_array($h->name, $labels)) {
+                        array_push($labels, $h->name);
+                    }
                 }
+            } else {
+                    $order = self::getFilteredOrdersQuery($request)
+                        ->where($verticalQuery, $v->id)
+                        ->selectRaw('sum(orders.vts_overall_sum) as sum, count(orders.vts_overall_sum) as count')
+                        ->get();
+
+                    if (isset($order[0]->sum)) {
+                        $sums[] = $order[0]->sum;
+                    } else {
+                        $sums[] = 0;
+                    }
+                    $count[] = $order[0]->count;
+                    array_push($labels, '');
             }
 
             //$data[$v->name] = array('sum'=>$sums,'count' => $count);
@@ -905,7 +936,6 @@ exit();*/
 
         print '<pre>';print_r($data);print '</pre>';exit();
 
-        $property = 'Возраст';
         return response()->json([
             'property' => $property,
             'data' => $data,
