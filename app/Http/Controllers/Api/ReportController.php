@@ -813,8 +813,8 @@ exit();*/
                 $data[2] = 'Возраст';
             break;
             case 'sale_center':
-                if($request->sale_center != null && $request->sale_center != 'все'){
-                    $items[0] = SaleCenter::findOrFail($request->sale_center);
+                if($request->sale_center_id != null && $request->sale_center_id != 'все'){
+                    $items[0] = SaleCenter::findOrFail($request->sale_center_id);
                 } else {
                     $items = SaleCenter::all();
                 }
@@ -823,8 +823,8 @@ exit();*/
                 $data[2] = 'Центр продаж';
             break;
             case 'sale_channel':
-                if($request->sale_channel != null && $request->sale_channel != 'все'){
-                    $items[0] = SaleChannel::findOrFail($request->sale_channel);
+                if($request->sale_channel_id != null && $request->sale_channel_id != 'все'){
+                    $items[0] = SaleChannel::findOrFail($request->sale_channel_id);
                 } else {
                     $items = SaleChannel::all();
                 }
@@ -833,8 +833,8 @@ exit();*/
                 $data[2] = 'Канал продаж';
             break;
             case 'department':
-                if($request->department != null && $request->department != 'все'){
-                    $items[0] = Department::findOrFail($request->department);
+                if($request->department_id != null && $request->department_id != 'все'){
+                    $items[0] = Department::findOrFail($request->department_id);
                 } else {
                     $items = Department::all();
                 }
@@ -843,8 +843,8 @@ exit();*/
                 $data[2] = 'Департамент';
             break;
             case 'referrer':
-                if($request->referrer != null && $request->referrer != 'все'){
-                    $items[0] = Referrer::findOrFail($request->referrer);
+                if($request->referrer_id != null && $request->referrer_id != 'все'){
+                    $items[0] = Referrer::findOrFail($request->referrer_id);
                 } else {
                     $items = Referrer::all();
                 }
@@ -853,8 +853,8 @@ exit();*/
                 $data[2] = 'Referrer';
             break;
             case 'agent':
-                if($request->agent != null && $request->agent != 'все'){
-                    $items[0] = Agent::findOrFail($request->agent);
+                if($request->agent_id != null && $request->agent_id != 'все'){
+                    $items[0] = Agent::findOrFail($request->agent_id);
                 } else {
                     $items = Agent::all();
                 }
