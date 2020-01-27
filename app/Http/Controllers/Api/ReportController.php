@@ -422,7 +422,7 @@ class ReportController extends Controller
         $data = [];
         switch($filter){
             case 'region':
-                if ($request->region_id != null && $request->region_id != 'все') {
+                if (isset($request->region_id ) && $request->region_id != null && $request->region_id != 'все') {
                     $items[0] = Region::findOrFail($request->region_id);
                 } else {
                     $items = Region::all();
@@ -432,8 +432,8 @@ class ReportController extends Controller
                 $data[2] = 'Город';
             break;
             case 'age':
-                if($request->age_category != null && $request->age_category != 'все'){
-                    $items[0] = Age::findOrFail($request->age_category);
+                if(isset($request->age_category) && $request->age_category != null && $request->age_category != 'все'){
+                    $items[0] = Age::where('name',$request->age_category)->first();
                 } else {
                     $items = Age::all();
                 }
@@ -506,10 +506,12 @@ class ReportController extends Controller
     }
 
     public function getPivotReport(Request $request) {
+        //$request = $request->filters;
+
         ini_set('max_execution_time', 150000);
         $firstFilter = 'region';
-        if($request->firstFilter && $request->firstFilter != '' && $request->firstFilter != null){
-            $firstFilter = $request->firstFilter;
+        if(isset($request->filter_1) && $request->filter_1 != '' && $request->filter_1 != null){
+            $firstFilter = $request->filter_1;
         }
 
         $filterData = self::getFilterData($firstFilter,$request);
@@ -517,8 +519,12 @@ class ReportController extends Controller
         $verticalQuery = $filterData[1];
         $property = $filterData[2];
 
-        if($request->secondFilter && $request->secondFilter != '' && $request->secondFilter != null) {
-            $filterData = self::getFilterData($request->secondFilter, $request);
+        if($firstFilter == $request->filter_2){
+            $request->filter_2 = null;
+        }
+
+        if($request->filter_2 && $request->filter_2 != '' && $request->filter_2 != null) {
+            $filterData = self::getFilterData($request->filter_2, $request);
             $horizontal = $filterData[0];
             $horizontalQuery = $filterData[1];
         } else {
@@ -592,10 +598,11 @@ class ReportController extends Controller
     }
 
     public function getComparativeReport(Request $request){
+        $request = $request->filters;
         ini_set('max_execution_time', 150000);
         $firstFilter = 'age';
-        if($request->firstFilter && $request->firstFilter != ''){
-            $firstFilter = $request->firstFilter;
+        if(isset($request->filter_1) && $request->filter_1 != '' && $request->filter_1 != null){
+            $firstFilter = $request->filter_1;
         }
 
         $filterData = self::getFilterData($firstFilter,$request);
@@ -645,15 +652,15 @@ class ReportController extends Controller
             $countprev[] = self::numberFormat($orderPrevious[0]->count);
             $avgprev[] = self::numberFormat($orderPrevious[0]->avg);
 
-            if (!in_array($request->from.'-'.$request->to, $labels)) {
-                array_push($labels, $request->from.'-'.$request->to);
+            if (!in_array($request->from_date.'-'.$request->to_date, $labels)) {
+                array_push($labels, $request->from_date.'-'.$request->to_date);
             }
 
             if (!in_array('доля', $labels)) {
                 array_push($labels, 'доля');
             }
 
-            $fromPrev = self::minusOneYear($request->from);
+            $fromPrev = self::minusOneYear($request->from_date);
             $toPrev = self::minusOneYear($request->to);
 
             if (!in_array($fromPrev.'-'.$toPrev, $labels)) {
@@ -679,7 +686,7 @@ class ReportController extends Controller
             //$data[$v->name] = $sums;
         }
 
-        //print '<pre>';print_r($data);print '</pre>';exit();
+        print '<pre>';print_r($data);print '</pre>';exit();
 
         return response()->json([
             'property' => $property,
