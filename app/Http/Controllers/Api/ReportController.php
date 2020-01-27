@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Order;
 use App\Region;
 use App\Age;
+use App\Gift;
 use App\Client;
 use App\Report;
 use App\SaleCenter;
@@ -31,17 +32,6 @@ class ReportController extends Controller
         $payout_sums = [];
         $payout_counts = [];
         $cross_sums = [];
-//
-//        foreach ($labels as $key => $label) {
-//            $request->age_category = $label;
-//            $orders = self::getFilteredOrdersQuery($request)->get();
-//            array_push($counts, count($orders));
-//            array_push($sums, $orders->sum('vts_overall_sum'));
-//            array_push($avgs, $orders->sum('avg_sum'));
-//            array_push($payout_counts, $orders->sum('vts_lost_count'));
-//            array_push($payout_sums, $orders->sum('payout_sum'));
-//            array_push($cross_sums, $orders->sum('vts_cross_result'));
-//        }
 
         $request->age_category = null;
         $orders = self::getFilteredOrdersQuery($request)
@@ -70,74 +60,6 @@ class ReportController extends Controller
         ]);
     }
 
-    /*public function getRegionsReport(Request $request) {
-        ini_set('max_execution_time', 900);
-        if($request->region_id != null && $request->region_id != 'все'){
-            $regions[0] = Region::findOrFail($request->region_id);
-        } else {
-            $regions = Region::all();
-        }
-
-        $labels = [];
-        $counts = [];
-        $ages = [];
-        $sums = [];
-        $avgs = [];
-        $payout_sums = [];
-        $payout_counts = [];
-        $cross_sums = [];
-        $regionss = [];
-        $property = '';
-
-        foreach ($regions as $region) {
-            $request->region_id = $region->id;
-            $orders = self::getFilteredOrdersQuery($request)
-                ->with('client')
-                ->get()
-                ->groupBy('client.age_category');
-
-//            $orders->with(['client' => function($q){
-//                $q->groupBy('age_category');
-//            }]);
-            foreach($orders as $key => $ordersgroup) {
-                  $sums[$key] =  self::numberFormat($ordersgroup->sum('vts_overall_sum'));
-//                array_push($labels, $region->name);
-//                array_push($counts, count($orders));
-//                array_push($sums, self::numberFormat($orders->sum('vts_overall_sum')));
-//                array_push($avgs, self::numberFormat($orders->sum('avg_sum')));
-//                array_push($payout_counts, self::numberFormat($orders->sum('vts_lost_count')));
-//                array_push($payout_sums, self::numberFormat($orders->sum('payout_sum')));
-//                array_push($cross_sums, self::numberFormat($orders->sum('vts_cross_result')));
-                if(!in_array($key,$labels)) {
-                    array_push($labels, $key);
-                }
-            }
-            $regionss[$region->name] = array(
-                'sums' => $sums
-            );
-        }
-//        $orders = self::getFilteredOrdersQuery($request);
-
-//        $orders->with(['client' => function($q){
-//            $q->groupBy('age_category');
-//        }]); //->groupBy('age_category');
-        $property = 'Город';
-        return response()->json([
-            'property' => $property,
-            'data' => $regionss,
-            'labels' => $labels,
-            //'ages' => $ages,
-            'counts' => $counts,
-            'sums' => $sums,
-            'avgs' => $avgs,
-            'payout_sums' => $payout_sums,
-            'payout_counts' => $payout_counts,
-            'cross_cums' => $cross_sums
-        ]);
-
-    }*/
-
-
     public function getRegionsReport(Request $request) {
         ini_set('max_execution_time', 900);
         if($request->region_id != null && $request->region_id != 'все'){
@@ -153,12 +75,6 @@ class ReportController extends Controller
         foreach ($regions as $region) {
             $request->region_id = $region->id;
             $orders = self::getFilteredOrdersQuery($request)
-                //->with('client')//->where('id',$request->age_category)
-//                ->whereHas('client', function ($query) use ($request){
-//                    if($request->age_category != 2 && $request->age_category != 'все' && $request->age_category != null) {
-//                        $query->where('age_category', '=', $request->age_category);
-//                    }
-//                })
                 ->get()
                 ->groupBy('client.age_category');
             foreach($orders as $key => $ordersgroup) {
@@ -204,7 +120,6 @@ class ReportController extends Controller
         foreach ($regions as $region) {
             $request->region_id = $region->id;
             $orders = self::getFilteredOrdersQuery($request)
-                //->with('client')//->where('id',$request->age_category)
                 ->whereHas('client', function ($query) use ($request){
                     if($request->age_category != 2 && $request->age_category != 'все' && $request->age_category != null) {
                         $query->where('age_category', '=', $request->age_category);
@@ -245,41 +160,6 @@ class ReportController extends Controller
 
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public function getTest(Request $request) {
         print 'test';exit();
         ini_set('max_execution_time', 900);
@@ -293,235 +173,14 @@ class ReportController extends Controller
         $sums = [];
         $regionss = [];
         $property = '';
-
-//        $users = DB::table('orders')
-//            ->LeftJoin('times', 'times.id', '=', 'orders.time_id')->whereBetween('times.date',['2018-04-20', '2018-04-20'])
-//            ->LeftJoin('clients', 'clients.id', '=', 'orders.client_id')//->groupBy('clients.age_category')
-//            ->LeftJoin('regions', 'regions.id', '=', 'clients.region_id')
-//            //->select(DB::raw('count(*) as vts_overall_sums'))
-//            //->where('status', '<>', 1)
-//            //->whereBetween('times.date', ['2018-04-20', '2018-04-20'])
-//            //->select('SELECT SUM(orders.vts_overall_sum)')
-//               // ->sum('orders.vts_overall_sum')
-//            //->groupBy('status')
-////            ->selectRaw('
-////                SUM(orders.vts_overall_sum) AS type_a,
-////                COUNT(orders.id) AS count
-////            ')
-//            //->select(DB::raw('count(*) as count'))
-//            ->get()
-//            ->groupBy('clients.age_category');
-//
-//        foreach($users as $u){
-////            $u = array()$u;
-////            print $u;
-////            exit();
-//            print_r($u);print '<br><br><br>';
-//        }
-//        //print_r($users);
-//        exit();
-
-
-
-//        $request->from_date = '2019-04-20';
-//        $request->to_date = '2019-04-20';
-//        $request->from = '2019-04-20';
-//        $request->to = '2019-04-20';
         $orders = self::getFilteredOrdersQuery($request)
-//            ->whereHas('client',function ($query) use ($data){
-//                //...
-//                //$query->groupBy('clients.region_id');
-//                //$query->whereHas('region')->groupBy('clients.region_id');
-//            })
-//            ->whereHas('region',function ($query) use ($data){
-//                //...
-//                //$query->groupBy('clients.region_id');
-//                //$query->whereHas('region')->groupBy('clients.region_id');
-//                //$query->groupBy('regions.name');
-//            })
-                //->select('orders.ogpo_vts_result')
-//            ->selectRaw('
-//                SUM(vts_overall_sum) AS sumssssssss,
-//                COUNT(id) AS countccccccc
-//            ')
-
-            //->get();
             ->groupBy(['region_name','age_category'])->sum('vts_overall_sum');
-
-            //->groupBy(['region.name','client.age_category']);  //,'client.region_id'
-        // 2 varianta: 1) summirovat ili ne podklyachat region i age_category - no togda nado budet
-
-            //->groupBy(['region_id','age_category']);
-
-//            ->groupBy('age_category')
-//            ->selectRaw('sum(vts_overall_sum) as sum, age_category')
-//            //->groupBy(['region_id','age_category'])
-//            ->pluck('sum','age_category');
-
-            //->get()->groupBy(['age_category','region_name']);
-
-//            ->groupBy('region_name')
-//            ->selectRaw('*, sum(vts_overall_sum) as sum')
-//            ->get();
-
-
-
-
-        //->groupBy(['client_id','region_id']);
-        //dd($orders);
-        //print '<pre>'; print_r($orders); print '</pre>'; exit();
-        //$query->Join('regions','regions.id','=','clients.region_id'); //->groupBy('clients.region_id');.
-//        $i = 0;
-//        foreach($orders as $order){
-//            print '<pre>';print_r($order);print '</pre>';
-//            //exit();
-//            //$or = Order::find($order->id);
-//            //print 'Обновление записи №'.$i.'- region_id = '.$order->client->region_id.'<br>, Пожалуйста подождите ...';
-//            //$or->region_id = $order->client->region_id;
-//            //$or->update();
-//            //print 'Запись обновлена №'.$i.'- region_id = '.$order->client->region_id.'<br>,';
-//            //$i++;
-//        }
-
-
-//exit();
-//
-//        print '<pre>'; print_r($orders); print '</pre>'; exit();
         $property = 'Возраст';
         return response()->json([
             'property' => $property,
-            'data' => $orders,
-            //'labels' => $labels,
-            //'sums' => $data
+            'data' => $orders
         ]);
-
-        /*foreach($orders as $key => $order){
-            print $key.'===<br>';
-            foreach($order as $k => $o){
-                print_r($o);
-            }
-            print '<br><br><br>';
-        }
-
-        exit();
-       //print '<pre>'; print_r($orders); print '</pre>'; exit();
-
-        foreach ($regions as $region) {
-            $request->region_id = $region->id;
-            $orders = self::getFilteredOrdersQuery($request)
-                //->with('client')//->where('id',$request->age_category)
-                ->whereHas('client', function ($query) use ($request){
-                    if($request->age_category != 2 && $request->age_category != 'все' && $request->age_category != null) {
-                        $query->where('age_category', '=', $request->age_category);
-                    }
-                    $query->whereHas('region', function ($query) use ($request){
-                        if($request->region_id != 'все' && $request->region_id != null) {
-                            $query->where('region_id', '=', $request->region_id);
-                        }
-                    });
-                })
-                ->get()
-                ->groupBy('client.age_category');
-            foreach($orders as $key => $ordersgroup) {
-                $sums[$key] = $ordersgroup;
-//                if(isset($request->type) && $request->type == 1){
-//                    $data[$region->name] =  self::numberFormat($ordersgroup->sum('vts_overall_sum'));
-//                } else {    // kolichestvo
-//                    $data[$region->name] =  self::numberFormat(count($ordersgroup));
-//                }
-
-                $regionss[$key] = array(
-                    'data' => $data
-                );
-            }
-            if(!in_array($region->name,$labels)) {
-                array_push($labels, $region->name);
-            }
-        }
-
-        $property = 'Возраст';
-        return response()->json([
-            'property' => $property,
-            'data' => $regionss,
-            'labels' => $labels,
-            'sums' => $data
-        ]);*/
-
     }
-
-
-
-
-
-    public function getTest2(Request $request) {
-       /* ini_set('max_execution_time', 1500000000);
-        $data = [];
-        $labels = [];
-        $sums = [];
-        $regionss = [];
-        $property = '';
-        print 'sql';
-        $orders = self::getFilteredOrdersQuery($request)
-            ->whereHas('client',function ($query) use ($data){
-                //...
-                //$query->groupBy('clients.region_id');
-                //$query->whereHas('region')->groupBy('clients.region_id');
-            })
-//            ->whereHas('region',function ($query) use ($data){
-//                //...
-//                //$query->groupBy('clients.region_id');
-//                //$query->whereHas('region')->groupBy('clients.region_id');
-//                //$query->groupBy('regions.name');
-//            })
-        ->get();
-        $i = 0;
-print 'Count:'.count($orders).'; ';
-        foreach($orders as $order){
-            //print '<pre>';print_r($order);print '</pre>';
-            //exit();
-            //print $order->client->region->name;exit();
-            if($order->client->age_category == '20-25'){
-                $age_id = 1;
-            }
-            if($order->client->age_category == '26-34'){
-                $age_id = 2;
-            }
-            if($order->client->age_category == '35-44'){
-                $age_id = 3;
-            }
-            if($order->client->age_category == '45-54'){
-                $age_id = 4;
-            }
-            if($order->client->age_category == '55-64'){
-                $age_id = 5;
-            }
-            if($order->client->age_category == 'старше 64'){
-                $age_id = 6;
-            }
-            if($order->client->age_category == 'младше 20'){
-                $age_id = 7;
-            }
-
-
-            $or = Order::find($order->id);
-            print 'Обновление записи №'.$order->id.'- age_category = '.$order->client->age_category.'<br>, Пожалуйста подождите ...';
-            $or->region_d = $order->client->region_id;
-            $or->age_category_name = $order->client->age_category;
-            $or->age_id = $age_id;
-            $or->update();
-            print 'Запись обновлена №'.$order->id.'- age_category = '.$order->client->age_category.'---'.$age_id.'<br>,';
-            $i++;
-            //exit();
-        }
-        print 'end time-'.date('Y.m.d H:i:s');
-
-exit();*/
-
-    }
-
-
-
-
 
     public function getSaleCentersReport(Request $request) {
         $centers = SaleCenter::all();
@@ -558,22 +217,11 @@ exit();*/
 
     }
 
-    private function getFilteredOrdersQuery ($request) {
-//        $orders = Order::whereHas('time', function (Builder $query) use ($request){
-//            $query->where('date', '>=', $request->from)->where('date', '<=', $request->to);
-//        });
+    private function getFilteredOrdersQuery ($request,$tableType = '') {
+        $orders = self::filterOrdersByTime($request,$tableType);
 
-//        if (isset($request->gender)
-//            || isset($request->region_id)
-//            || isset($request->)
-//            || ( isset($request->age_category) && $request->age_category !== 'все') ) {
-        //dd($request->from);
-        $orders = self::filterOrdersByTime($request);
-
-        //$orders = $orders->get();
-
-        if (isset($request->gender) && $request->gender != null
-            || isset($request->region_id) && $request->region_id != null
+        if (isset($request->gender) && $request->gender != null && $request->gender != 'все'
+            || isset($request->region_id) && $request->region_id != null && $request->region_id != 'все'
             || ( isset($request->insurance_class) && $request->insurance_class != 'все' && $request->insurance_class != null)
             || ( isset($request->age_category) && $request->age_category !== 'все' && $request->age_category != null))
             $orders = self::filterByClient($orders,$request);
@@ -586,7 +234,7 @@ exit();*/
         if (isset($request->sale_center) && $request->sale_center != null)
             $orders = $orders->where('sale_center_id', $request->sale_center);
 
-        if(isset($request->sale_channel) && $request->sale_channel != '')
+        if(isset($request->sale_channel) && $request->sale_channel != '' && $request->sale_channel != null)
             $orders = $orders->where('sale_channel_id', $request->sale_channel);
 
         if(isset($request->referrer) && $request->referrer != null)
@@ -598,20 +246,21 @@ exit();*/
         return $orders;
     }
 
-    private function filterOrdersByTime($request) {
-        return Order::whereHas('time', function ($query) use ($request){
-            if(isset($request->from_date)) {
-                $query->whereBetween('date', [$request->from_date, $request->to_date]);
+    private function filterOrdersByTime($request,$tableType = '') {
+        return Order::whereHas('time', function ($query) use ($request,$tableType){
+            $from = '2019.01.01';   //$request->from_date;
+            $to = '2019.01.30';     //$request->to_date;
+            if($tableType != ''){
+                $from = self::minusOneYear($from);
+                $to = self::minusOneYear($to);
             }
-            if(isset($request->from)) {
-                $query->whereBetween('date', [$request->from, $request->to]);
-            }
+            $query->whereBetween('date', [$from, $to]);
         });
     }
 
     private function filterByClient($orders,$request){
         return $orders->whereHas('client', function ($query) use ($request) {
-            if (isset($request->gender) && $request->gender != 2)
+            if (isset($request->gender) && $request->gender != 2 && $request->gender != null)
                 $query->where('gender', $request->gender);
 
             if (isset($request->region_id) && $request->region_id != null)
@@ -657,7 +306,6 @@ exit();*/
 
         // todo if isset filter set
 
-
 //        $query = Time::where('date', '>=', $request->from)
 //                ->where('date', '<=', $request->to);
 //
@@ -671,8 +319,6 @@ exit();*/
 
 
         $orders = self::getFilteredOrdersQuery($request)->get();
-
-        //dd($orders);
 
         return response()->json([
 //            'general_report' => self::generateReport($orders->get())
@@ -700,9 +346,7 @@ exit();*/
 //                        )->get();
     }
 
-    private function numberFormat($number){
-        return number_format($number, 0, '.', ' ');
-    }
+
 
     private static function generateReport($orders)
     {
@@ -733,16 +377,8 @@ exit();*/
         $gender = $request->gender;
         $age_category = $request->age_category;
         $insurance_class = $request->insurance_class;
-
         $from_date = date('Y-m-d', strtotime($from_date));
         $to_date = date('Y-m-d', strtotime($to_date));
-//        dd($from_date);
-
-//        $time = DB::table('times')->leftJoin('orders', 'times.id', '=', 'orders.time_id')
-//
-//        dd($times);
-
-
         $model = DB::table('regions')
             ->leftJoin('clients', 'regions.id', '=', 'clients.region_id')
             ->leftJoin('orders', 'clients.id', '=', 'orders.client_id')
@@ -751,14 +387,10 @@ exit();*/
             ->where('insurance_class', $insurance_class)
             ->where('age_category', $age_category)
             ->where('gender', $gender)
-            //->where('date', $from_date)
             ->whereBetween('date', [$from_date, $to_date])
-//            ->groupBy('name')
             ->get();
 
         $result = [];
-
-//        dd($model);
 
         foreach ($model as $item) {
             array_push($result, [
@@ -785,9 +417,6 @@ exit();*/
 
         return $result;
     }
-
-
-
 
     private function getFilterData($filter,$request){
         $data = [];
@@ -862,13 +491,109 @@ exit();*/
                 $data[1] = 'agent_id';
                 $data[2] = 'Агенты';
             break;
+            case 'gift':
+                if(isset($request->gift_id ) && $request->gift_id != null && $request->gift_id != 'все'){
+                    $items[0] = Gift::findOrFail($request->gift_id);
+                } else {
+                    $items = Gift::all();
+                }
+                $data[0] = $items;
+                $data[1] = 'gift_id';
+                $data[2] = 'Подарки';
+            break;
         }
         return $data;
     }
 
-    public function getWorkedReport(Request $request) {
-        ini_set('max_execution_time', 15000);
+    public function getPivotReport(Request $request) {
+        ini_set('max_execution_time', 150000);
         $firstFilter = 'region';
+        if($request->firstFilter && $request->firstFilter != '' && $request->firstFilter != null){
+            $firstFilter = $request->firstFilter;
+        }
+
+        $filterData = self::getFilterData($firstFilter,$request);
+        $vertical = $filterData[0];
+        $verticalQuery = $filterData[1];
+        $property = $filterData[2];
+
+        if($request->secondFilter && $request->secondFilter != '' && $request->secondFilter != null) {
+            $filterData = self::getFilterData($request->secondFilter, $request);
+            $horizontal = $filterData[0];
+            $horizontalQuery = $filterData[1];
+        } else {
+            $horizontal = [];
+        }
+
+        $data = [];
+        $labels = [];
+        foreach ($vertical as $v) {
+            $sums = [];
+            $count = [];
+            $avg = [];
+            if(count($horizontal) > 0) {
+                foreach ($horizontal as $h) {
+                    $order = self::getFilteredOrdersQuery($request)
+                        ->where($verticalQuery, $v->id)
+                        ->where($horizontalQuery, $h->id)
+                        ->selectRaw('
+                            sum(orders.vts_overall_sum) as sum,
+                            count(orders.id) as count,
+                            sum(orders.avg_sum) as avg
+                            ')
+                        ->get();
+
+                    if (isset($order[0]->sum)) {
+                        $sums[$h->name] = self::numberFormat($order[0]->sum);
+                    } else {
+                        $sums[$h->name] = 0;
+                    }
+                    $count[$h->name] = self::numberFormat($order[0]->count);
+                    $avg[$h->name] = self::numberFormat($order[0]->avg);
+
+                    if (!in_array($h->name, $labels)) {
+                        array_push($labels, $h->name);
+                    }
+                }
+            } else {
+                    $order = self::getFilteredOrdersQuery($request)
+                        ->where($verticalQuery, $v->id)
+                        ->selectRaw('
+                            sum(orders.vts_overall_sum) as sum,
+                            count(orders.id) as count,
+                            sum(orders.avg_sum) as avg
+                            ')
+                        ->get();
+
+                    if (isset($order[0]->sum)) {
+                        $sums[] = self::numberFormat($order[0]->sum);
+                    } else {
+                        $sums[] = 0;
+                    }
+                    $count[] = self::numberFormat($order[0]->count);
+                    $avg[] = self::numberFormat($order[0]->avg);
+
+                    if (!in_array('', $labels)) {
+                        array_push($labels, '');
+                    }
+            }
+
+            $data[$v->name] = array('sum'=>$sums,'count' => $count,'avg' => $avg);
+            //$data[$v->name] = $sums;
+        }
+
+        //print '<pre>';print_r($data);print '</pre>';exit();
+
+        return response()->json([
+            'property' => $property,
+            'data' => $data,
+            'labels' => $labels,
+        ]);
+    }
+
+    public function getComparativeReport(Request $request){
+        ini_set('max_execution_time', 150000);
+        $firstFilter = 'age';
         if($request->firstFilter && $request->firstFilter != ''){
             $firstFilter = $request->firstFilter;
         }
@@ -878,68 +603,98 @@ exit();*/
         $verticalQuery = $filterData[1];
         $property = $filterData[2];
 
-        if($request->secondtFilter && $request->secondtFilter != '') {
-            $filterData = self::getFilterData($request->secondtFilter, $request);
-            $horizontal = $filterData[0];
-            $horizontalQuery = $filterData[1];
-        } else {
-            $horizontal = [];
-        }
-
         $data = [];
         $labels = [];
-        $property = '';
         foreach ($vertical as $v) {
             $sums = [];
             $count = [];
-            if(count($horizontal) > 0) {
-                foreach ($horizontal as $h) {
-                    $order = self::getFilteredOrdersQuery($request)
-                        ->where($verticalQuery, $v->id)
-                        ->where($horizontalQuery, $h->id)
-                        //                    ->whereHas('client', function ($query) use ($h,$v,$horizsontalQuery){
-                        //                        $query->where($horizsontalQuery, $h->name);
-                        //                    })
-                        ->selectRaw('sum(orders.vts_overall_sum) as sum, count(orders.vts_overall_sum) as count')
-                        ->get();
+            $avg = [];
+            $sumsprev = [];
+            $countprev = [];
+            $avgprev = [];
+            $order = self::getFilteredOrdersQuery($request)
+                ->where($verticalQuery, $v->id)
+                ->selectRaw('
+                        sum(orders.vts_overall_sum) as sum,
+                        count(orders.id) as count,
+                        sum(orders.avg_sum) as avg
+                        ')
+                ->get();
+            $orderPrevious = self::getFilteredOrdersQuery($request,'comparative')
+                ->where($verticalQuery, $v->id)
+                ->selectRaw('
+                        sum(orders.vts_overall_sum) as sum,
+                        count(orders.id) as count,
+                        sum(orders.avg_sum) as avg
+                        ')
+                ->get();
 
-                    if (isset($order[0]->sum)) {
-                        $sums[$h->name] = $order[0]->sum;
-                    } else {
-                        $sums[$h->name] = 0;
-                    }
-                    $count[$h->name] = $order[0]->count;
-
-                    if (!in_array($h->name, $labels)) {
-                        array_push($labels, $h->name);
-                    }
-                }
+            if (isset($order[0]->sum)) {
+                $sums[] = self::numberFormat($order[0]->sum);
             } else {
-                    $order = self::getFilteredOrdersQuery($request)
-                        ->where($verticalQuery, $v->id)
-                        ->selectRaw('sum(orders.vts_overall_sum) as sum, count(orders.vts_overall_sum) as count')
-                        ->get();
+                $sums[] = 0;
+            }
+            if (isset($orderPrevious[0]->sum)) {
+                $sumsprev[] = self::numberFormat($orderPrevious[0]->sum);
+            } else {
+                $sumsprev[] = 0;
+            }
+            $count[] = self::numberFormat($order[0]->count);
+            $avg[] = self::numberFormat($order[0]->avg);
 
-                    if (isset($order[0]->sum)) {
-                        $sums[] = $order[0]->sum;
-                    } else {
-                        $sums[] = 0;
-                    }
-                    $count[] = $order[0]->count;
-                    array_push($labels, '');
+            $countprev[] = self::numberFormat($orderPrevious[0]->count);
+            $avgprev[] = self::numberFormat($orderPrevious[0]->avg);
+
+            if (!in_array($request->from.'-'.$request->to, $labels)) {
+                array_push($labels, $request->from.'-'.$request->to);
             }
 
-            //$data[$v->name] = array('sum'=>$sums,'count' => $count);
-            $data[$v->name] = $sums;
+            if (!in_array('доля', $labels)) {
+                array_push($labels, 'доля');
+            }
+
+            $fromPrev = self::minusOneYear($request->from);
+            $toPrev = self::minusOneYear($request->to);
+
+            if (!in_array($fromPrev.'-'.$toPrev, $labels)) {
+                array_push($labels, $fromPrev.'-'.$toPrev);
+            }
+
+            if (!in_array(' доля ', $labels)) {
+                array_push($labels, ' доля ');
+            }
+
+            if (!in_array('изменение', $labels)) {
+                array_push($labels, 'изменение');
+            }
+
+            $data[$v->name] = array(
+                'sum'=>$sums,
+                'count' => $count,
+                'avg' => $avg,
+                'sumsprev'=>$sumsprev,
+                'countprev' => $countprev,
+                'avgprev' => $avgprev
+            );
+            //$data[$v->name] = $sums;
         }
 
-        print '<pre>';print_r($data);print '</pre>';exit();
+        //print '<pre>';print_r($data);print '</pre>';exit();
 
         return response()->json([
             'property' => $property,
             'data' => $data,
             'labels' => $labels,
         ]);
+    }
+
+    private function numberFormat($number){
+        $number = round($number);
+        return number_format($number, 0, '.', ' ');
+    }
+
+    private function minusOneYear($date){
+        return date('Y.m.d',strtotime(str_replace('.','-',$date).' -1 year'));
     }
 
 }
