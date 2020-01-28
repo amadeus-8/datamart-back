@@ -22,6 +22,41 @@ use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
+    const GETFIELDS = '
+                sum(orders.vts_overall_sum) as vts_overall_sum,
+                sum(orders.ogpo_vts_result) as ogpo_vts_result,
+                sum(orders.vts_cross_result) as vts_cross_result,
+                sum(orders.avg_sum) as avg_sum,
+                sum(orders.avg_cross_result) as avg_cross_result,
+                sum(orders.overall_lost_count) as overall_lost_count,
+                sum(orders.vts_lost_count) as vts_lost_count,
+                sum(orders.declared_claims) as declared_claims,
+                sum(orders.pending_claims) as pending_claims,
+                sum(orders.accepted_claims) as accepted_claims,
+                sum(orders.payout_reject_claims) as payout_reject_claims,
+                sum(orders.client_reject_claims) as client_reject_claims,
+                sum(orders.payout_sum) as payout_sum,
+                count(orders.id) as count
+    ';
+
+    const GETFIELDSPREV = '
+                sum(vts_overall_sum) as vts_overall_sum_prev,
+                sum(ogpo_vts_result) as ogpo_vts_result_prev,
+                sum(vts_cross_result) as vts_cross_result_prev,
+                sum(avg_sum) as avg_sum_prev,
+                sum(avg_cross_result) as avg_cross_result_prev,
+                sum(overall_lost_count) as overall_lost_count_prev,
+                sum(vts_lost_count) as vts_lost_count_prev,
+                sum(declared_claims) as declared_claims_prev,
+                sum(pending_claims) as pending_claims_prev,
+                sum(accepted_claims) as accepted_claims_prev,
+                sum(payout_reject_claims) as payout_reject_claims_prev,
+                sum(client_reject_claims) as client_reject_claims_prev,
+                sum(payout_sum) as payout_sum_prev,
+                count(orders.id) as count_prev
+    ';
+
+
     public function getAgeCategoryChartData(Request $request){
         ini_set('max_execution_time', 900);
 //        $labels = ['младше 20', '20-25', '26-34', '35-44', '45-54', '55-64', 'старше 64'];
@@ -248,8 +283,8 @@ class ReportController extends Controller
 
     private function filterOrdersByTime($request,$tableType = '') {
         return Order::whereHas('time', function ($query) use ($request,$tableType){
-            $from = '2019.01.01';   //$request->from_date;
-            $to = '2019.01.30';     //$request->to_date;
+            $from = $request->from_date;    //$from = '2019.01.01';
+            $to = $request->to_date;      //$to = '2019.01.31';
             if($tableType != ''){
                 $from = self::minusOneYear($from);
                 $to = self::minusOneYear($to);
@@ -506,8 +541,6 @@ class ReportController extends Controller
     }
 
     public function getPivotReport(Request $request) {
-        //$request = $request->filters;
-
         ini_set('max_execution_time', 150000);
         $firstFilter = 'region';
         if(isset($request->filter_1) && $request->filter_1 != '' && $request->filter_1 != null){
@@ -537,59 +570,34 @@ class ReportController extends Controller
             $sums = [];
             $count = [];
             $avg = [];
+            $vts_overall_sum = [];
             if(count($horizontal) > 0) {
+                $order = [];
                 foreach ($horizontal as $h) {
-                    $order = self::getFilteredOrdersQuery($request)
+                    $order[$h->name] = self::getFilteredOrdersQuery($request)
                         ->where($verticalQuery, $v->id)
                         ->where($horizontalQuery, $h->id)
-                        ->selectRaw('
-                            sum(orders.vts_overall_sum) as sum,
-                            count(orders.id) as count,
-                            sum(orders.avg_sum) as avg
-                            ')
+                        ->selectRaw(self::GETFIELDS)
                         ->get();
-
-                    if (isset($order[0]->sum)) {
-                        $sums[$h->name] = self::numberFormat($order[0]->sum);
-                    } else {
-                        $sums[$h->name] = 0;
-                    }
-                    $count[$h->name] = self::numberFormat($order[0]->count);
-                    $avg[$h->name] = self::numberFormat($order[0]->avg);
-
                     if (!in_array($h->name, $labels)) {
                         array_push($labels, $h->name);
                     }
+                    $order[$h->name] = $order[$h->name][0];
                 }
+
+                $data[$v->name] = $order;
             } else {
                     $order = self::getFilteredOrdersQuery($request)
                         ->where($verticalQuery, $v->id)
-                        ->selectRaw('
-                            sum(orders.vts_overall_sum) as sum,
-                            count(orders.id) as count,
-                            sum(orders.avg_sum) as avg
-                            ')
+                        ->selectRaw(self::GETFIELDS)
                         ->get();
-
-                    if (isset($order[0]->sum)) {
-                        $sums[] = self::numberFormat($order[0]->sum);
-                    } else {
-                        $sums[] = 0;
-                    }
-                    $count[] = self::numberFormat($order[0]->count);
-                    $avg[] = self::numberFormat($order[0]->avg);
-
                     if (!in_array('', $labels)) {
                         array_push($labels, '');
                     }
+                    $data[$v->name] = $order[0];
             }
-
-            $data[$v->name] = array('sum'=>$sums,'count' => $count,'avg' => $avg);
-            //$data[$v->name] = $sums;
         }
-
         //print '<pre>';print_r($data);print '</pre>';exit();
-
         return response()->json([
             'property' => $property,
             'data' => $data,
@@ -598,7 +606,6 @@ class ReportController extends Controller
     }
 
     public function getComparativeReport(Request $request){
-        $request = $request->filters;
         ini_set('max_execution_time', 150000);
         $firstFilter = 'age';
         if(isset($request->filter_1) && $request->filter_1 != '' && $request->filter_1 != null){
@@ -621,36 +628,28 @@ class ReportController extends Controller
             $avgprev = [];
             $order = self::getFilteredOrdersQuery($request)
                 ->where($verticalQuery, $v->id)
-                ->selectRaw('
-                        sum(orders.vts_overall_sum) as sum,
-                        count(orders.id) as count,
-                        sum(orders.avg_sum) as avg
-                        ')
+                ->selectRaw(self::GETFIELDS)
                 ->get();
             $orderPrevious = self::getFilteredOrdersQuery($request,'comparative')
                 ->where($verticalQuery, $v->id)
-                ->selectRaw('
-                        sum(orders.vts_overall_sum) as sum,
-                        count(orders.id) as count,
-                        sum(orders.avg_sum) as avg
-                        ')
+                ->selectRaw(self::GETFIELDSPREV)
                 ->get();
 
-            if (isset($order[0]->sum)) {
-                $sums[] = self::numberFormat($order[0]->sum);
-            } else {
-                $sums[] = 0;
-            }
-            if (isset($orderPrevious[0]->sum)) {
-                $sumsprev[] = self::numberFormat($orderPrevious[0]->sum);
-            } else {
-                $sumsprev[] = 0;
-            }
-            $count[] = self::numberFormat($order[0]->count);
-            $avg[] = self::numberFormat($order[0]->avg);
-
-            $countprev[] = self::numberFormat($orderPrevious[0]->count);
-            $avgprev[] = self::numberFormat($orderPrevious[0]->avg);
+//            if (isset($order[0]->sum)) {
+//                $sums[] = self::numberFormat($order[0]->sum);
+//            } else {
+//                $sums[] = 0;
+//            }
+//            if (isset($orderPrevious[0]->sum)) {
+//                $sumsprev[] = self::numberFormat($orderPrevious[0]->sum);
+//            } else {
+//                $sumsprev[] = 0;
+//            }
+//            $count[] = self::numberFormat($order[0]->count);
+//            $avg[] = self::numberFormat($order[0]->avg);
+//
+//            $countprev[] = self::numberFormat($orderPrevious[0]->count);
+//            $avgprev[] = self::numberFormat($orderPrevious[0]->avg);
 
             if (!in_array($request->from_date.'-'.$request->to_date, $labels)) {
                 array_push($labels, $request->from_date.'-'.$request->to_date);
@@ -674,15 +673,17 @@ class ReportController extends Controller
             if (!in_array('изменение', $labels)) {
                 array_push($labels, 'изменение');
             }
-
-            $data[$v->name] = array(
-                'sum'=>$sums,
-                'count' => $count,
-                'avg' => $avg,
-                'sumsprev'=>$sumsprev,
-                'countprev' => $countprev,
-                'avgprev' => $avgprev
-            );
+            //$order = (array)$order[0];
+            //$orderPrevious = (array)$orderPrevious[0];
+            $data[$v->name] = array_merge_recursive((array)$order[0],(array)$orderPrevious[0]);
+//            $data[$v->name] = array(
+//                'sum'=>$sums,
+//                'count' => $count,
+//                'avg' => $avg,
+//                'sumsprev'=>$sumsprev,
+//                'countprev' => $countprev,
+//                'avgprev' => $avgprev
+//            );
             //$data[$v->name] = $sums;
         }
 

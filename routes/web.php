@@ -19,7 +19,7 @@ Route::resource('users', 'UserController');
 
 Route::post('/importReports', 'HomeController@feedFromFile')->name('feed_from_file');
 Route::get('/test', 'ReportController@getComparativeReport');
-Route::get('/test2', 'ReportController@getTest2');
+Route::get('/test2', 'ReportController@getPivotReport');
 
 
 //Route::get('getkbms', function () {
