@@ -405,11 +405,11 @@ class ReportController extends Controller
         $lineSums = self::GETFIELDSSUM;
         foreach($lineSums as $name){
             if(intval($orderFirst[0][$name]) != 0 && $orderSecond[0][$name]) {
-//                if($comparative == 1) {
-//                    //$result[$name] = $this->numberFormat(((intval($orderFirst[0][$name]) / intval($orderSecond[0][$name]))-1) * 100);
-//                } else {
+                if($comparative == 1) {
+                    $result[$name] = $this->numberFormat(((intval($orderFirst[0][$name]) / intval($orderSecond[0][$name]))-1) * 100);
+                } else {
                     $result[$name] = $this->numberFormat((intval($orderFirst[0][$name]) / intval($orderSecond[0][$name])) * 100);
-                //}
+                }
 
             } else {
                 $result[$name] = intval($orderFirst[0][$name]);
