@@ -364,7 +364,7 @@ class ReportController extends Controller
             }
 
             $fromPrev = str_replace('-','.',$this->minusOneYear($request->from_date));
-            $toPrev = str_replace('-','.',$this->minusOneYear($request->to));
+            $toPrev = str_replace('-','.',$this->minusOneYear($request->to_date));
 
             if (!in_array($fromPrev.'-'.$toPrev, $labels)) {
                 array_push($labels, $fromPrev.'-'.$toPrev);
