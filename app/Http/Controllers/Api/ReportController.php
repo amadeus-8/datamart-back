@@ -336,8 +336,9 @@ class ReportController extends Controller
             ->selectRaw(self::GETFIELDS)
             ->get();
         $bottomData = $this->createComparativeData($orderAll,$orderAllPrev,1);
-        $bottomD = array($orderAll[0],$orderAllPrev,$bottomData);
-
+        $bottomD = array($orderAll[0],$orderAllPrev[0],$bottomData);
+        $order = [];
+        $orderPrevious = [];
         foreach ($vertical as $v) {
             $sums = [];
             $count = [];
@@ -362,8 +363,8 @@ class ReportController extends Controller
                 array_push($labels, 'доля');
             }
 
-            $fromPrev = self::minusOneYear($request->from_date);
-            $toPrev = self::minusOneYear($request->to);
+            $fromPrev = str_replace('-','.',$this->minusOneYear($request->from_date));
+            $toPrev = str_replace('-','.',$this->minusOneYear($request->to));
 
             if (!in_array($fromPrev.'-'.$toPrev, $labels)) {
                 array_push($labels, $fromPrev.'-'.$toPrev);
@@ -383,12 +384,15 @@ class ReportController extends Controller
 
             $data[$v->name] = array($order[0],$firstDolya,$orderPrevious[0],$secondDolya,$comparative);
         }
+//        print '<pre>';print_r($data);print '</pre>';
+//        print '<pre>';print_r($bottomD);print '</pre>';exit();
+        //$data[] = $data;
 
         return response()->json([
             'property' => $property,
             'data' => $data,
             'labels' => $labels,
-            'bottomData' => $bottomData
+            'bottomData' => $bottomD
         ]);
     }
 
@@ -401,11 +405,11 @@ class ReportController extends Controller
         $lineSums = self::GETFIELDSSUM;
         foreach($lineSums as $name){
             if(intval($orderFirst[0][$name]) != 0 && $orderSecond[0][$name]) {
-                if($comparative == 1) {
-                    $result[$name] = $this->numberFormat(((intval($orderFirst[0][$name]) / intval($orderSecond[0][$name]))-1) * 100);
-                } else {
+//                if($comparative == 1) {
+//                    //$result[$name] = $this->numberFormat(((intval($orderFirst[0][$name]) / intval($orderSecond[0][$name]))-1) * 100);
+//                } else {
                     $result[$name] = $this->numberFormat((intval($orderFirst[0][$name]) / intval($orderSecond[0][$name])) * 100);
-                }
+                //}
 
             } else {
                 $result[$name] = intval($orderFirst[0][$name]);
