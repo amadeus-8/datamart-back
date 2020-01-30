@@ -267,17 +267,17 @@ class ReportController extends Controller
         if (isset($request->status_id) && $request->status_id != null)
             $orders = $orders->where('status_id', $request->status_id);
 
-        if (isset($request->sale_center) && $request->sale_center != null)
-            $orders = $orders->where('sale_center_id', $request->sale_center);
+        if (isset($request->sale_center_id) && $request->sale_center_id != null)
+            $orders = $orders->where('sale_center_id', $request->sale_center_id);
 
-        if(isset($request->sale_channel) && $request->sale_channel != '' && $request->sale_channel != null)
-            $orders = $orders->where('sale_channel_id', $request->sale_channel);
+        if(isset($request->sale_channel_id) && $request->sale_channel_id != '' && $request->sale_channel_id != null)
+            $orders = $orders->where('sale_channel_id', $request->sale_channel_id);
 
-        if(isset($request->referrer) && $request->referrer != null)
-            $orders = $orders->where('referrer_id', $request->referrer);
+        if(isset($request->referrer_id) && $request->referrer_id != null)
+            $orders = $orders->where('referrer_id', $request->referrer_id);
 
-        if(isset($request->department) && $request->department != null)
-            $orders = $orders->where('department_id', $request->department);
+        if(isset($request->department_id) && $request->department_id != null)
+            $orders = $orders->where('department_id', $request->department_id);
 
         return $orders;
     }
@@ -664,6 +664,11 @@ class ReportController extends Controller
         $orderAllPrev = self::getFilteredOrdersQuery($request,'comparative')
             ->selectRaw(self::GETFIELDS)
             ->get();
+        $bottomData = $this->createComparativeData($orderAll,$orderAllPrev,1);
+        //$bottomDataPrev = $this->createComparativeData($orderAll,$orderAllPrev);
+        $bottomD = array($orderAll[0],$orderAllPrev,$bottomData);
+
+        //print '<pre>'; print_r($bottomD);print '</pre>'; exit();
 
         foreach ($vertical as $v) {
             $sums = [];
