@@ -18,6 +18,7 @@ use function foo\func;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Rap2hpoutre\FastExcel\FastExcel;
 
 
 class ReportController extends Controller
@@ -36,25 +37,41 @@ class ReportController extends Controller
                 sum(orders.payout_reject_claims) as payout_reject_claims,
                 sum(orders.client_reject_claims) as client_reject_claims,
                 sum(orders.payout_sum) as payout_sum,
-                count(orders.id) as count
+                count(orders.id) as count,
+
+                sum(ogpo_vts_count) as ogpo_vts_count,
+                sum(medical_count) as medical_count,
+                sum(megapolis_count) as megapolis_count,
+                sum(amortization_count) as amortization_count,
+                sum(kasko_count) as kasko_count,
+                sum(kommesk_comfort_count) as kommesk_comfort_count,
+                sum(tour_count) as tour_count
     ';
 
-    const GETFIELDSPREV = '
-                sum(vts_overall_sum) as vts_overall_sum_prev,
-                sum(ogpo_vts_result) as ogpo_vts_result_prev,
-                sum(vts_cross_result) as vts_cross_result_prev,
-                sum(avg_sum) as avg_sum_prev,
-                sum(avg_cross_result) as avg_cross_result_prev,
-                sum(overall_lost_count) as overall_lost_count_prev,
-                sum(vts_lost_count) as vts_lost_count_prev,
-                sum(declared_claims) as declared_claims_prev,
-                sum(pending_claims) as pending_claims_prev,
-                sum(accepted_claims) as accepted_claims_prev,
-                sum(payout_reject_claims) as payout_reject_claims_prev,
-                sum(client_reject_claims) as client_reject_claims_prev,
-                sum(payout_sum) as payout_sum_prev,
-                count(orders.id) as count_prev
-    ';
+//    const GETFIELDSPREV = '
+//                sum(vts_overall_sum) as vts_overall_sum_prev,
+//                sum(ogpo_vts_result) as ogpo_vts_result_prev,
+//                sum(vts_cross_result) as vts_cross_result_prev,
+//                sum(avg_sum) as avg_sum_prev,
+//                sum(avg_cross_result) as avg_cross_result_prev,
+//                sum(overall_lost_count) as overall_lost_count_prev,
+//                sum(vts_lost_count) as vts_lost_count_prev,
+//                sum(declared_claims) as declared_claims_prev,
+//                sum(pending_claims) as pending_claims_prev,
+//                sum(accepted_claims) as accepted_claims_prev,
+//                sum(payout_reject_claims) as payout_reject_claims_prev,
+//                sum(client_reject_claims) as client_reject_claims_prev,
+//                sum(payout_sum) as payout_sum_prev,
+//                count(orders.id) as count_prev
+//
+//                sum(ogpo_vts_count) as ogpo_vts_count_prev,
+//                sum(medical_count) as medical_count_prev,
+//                sum(megapolis_count) as megapolis_count_prev,
+//                sum(amortization_count) as amortization_count_prev,
+//                sum(kasko_count) as kasko_count_prev,
+//                sum(kommesk_comfort_count) as kommesk_comfort_count_prev,
+//                sum(tour_count) as tour_count_prev
+//    ';
 
 
     public function getAgeCategoryChartData(Request $request){
@@ -566,6 +583,8 @@ class ReportController extends Controller
 
         $data = [];
         $labels = [];
+        $list = [];
+        $list_h = [];
         foreach ($vertical as $v) {
             $sums = [];
             $count = [];
@@ -573,6 +592,7 @@ class ReportController extends Controller
             $vts_overall_sum = [];
             if(count($horizontal) > 0) {
                 $order = [];
+                $i=0;
                 foreach ($horizontal as $h) {
                     $order[$h->name] = self::getFilteredOrdersQuery($request)
                         ->where($verticalQuery, $v->id)
@@ -583,7 +603,23 @@ class ReportController extends Controller
                         array_push($labels, $h->name);
                     }
                     $order[$h->name] = $order[$h->name][0];
+                    //print '</pre>'; print_r($order[$h->name]->vts_overall_sum);print '</pre>';exit();
+
+
+//                    if($i == 0){
+//                        $list_h[$property] = $v->name;
+//                    }
+//                    $list_h[$h->name] = self::numberFormat($order[$h->name]->vts_overall_sum);
+//                    $i++;
+
+
+
                 }
+
+                //print '<pre>';print_r($list_h);print '</pre>';exit();
+                //$list1[] = array($property => $v->name);
+                //$list[] = array_merge($list1,$list_h);
+
 
                 $data[$v->name] = $order;
             } else {
@@ -595,8 +631,19 @@ class ReportController extends Controller
                         array_push($labels, '');
                     }
                     $data[$v->name] = $order[0];
+
+//print_r(self::GETFIELDS['vts_overall_sum']);exit();
+//                    $list_h[$property] = $v->name;
+//                    $list_h['vts_overall_sum'] = self::numberFormat($order[0]->vts_overall_sum);
+
+
             }
+            //$list[] = $list_h;
         }
+        //$list = collect($list);
+        //print_r($list);exit();
+        //return self::getExport($list);
+
         //print '<pre>';print_r($data);print '</pre>';exit();
         return response()->json([
             'property' => $property,
@@ -632,7 +679,7 @@ class ReportController extends Controller
                 ->get();
             $orderPrevious = self::getFilteredOrdersQuery($request,'comparative')
                 ->where($verticalQuery, $v->id)
-                ->selectRaw(self::GETFIELDSPREV)
+                ->selectRaw(self::GETFIELDS)    //GETFIELDSPREV
                 ->get();
 
 //            if (isset($order[0]->sum)) {
@@ -675,7 +722,8 @@ class ReportController extends Controller
             }
             //$order = (array)$order[0];
             //$orderPrevious = (array)$orderPrevious[0];
-            $data[$v->name] = array_merge_recursive((array)$order[0],(array)$orderPrevious[0]);
+            //$data[$v->name] = array_merge_recursive((array)$order[0],(array)$orderPrevious[0]);
+            $data[$v->name] = array($order[0],$orderPrevious[0]);
 //            $data[$v->name] = array(
 //                'sum'=>$sums,
 //                'count' => $count,
@@ -687,7 +735,7 @@ class ReportController extends Controller
             //$data[$v->name] = $sums;
         }
 
-        print '<pre>';print_r($data);print '</pre>';exit();
+        //print '<pre>';print_r($data);print '</pre>';exit();
 
         return response()->json([
             'property' => $property,
@@ -703,6 +751,15 @@ class ReportController extends Controller
 
     private function minusOneYear($date){
         return date('Y.m.d',strtotime(str_replace('.','-',$date).' -1 year'));
+    }
+
+    public function getExport($data){
+        //print '<pre>';print_r($data);print '</pre>';exit();
+//        $data = collect([
+//            [ 'id' => 1, 'name' => 'Jane' ],
+//            [ 'id' => 2 ],
+//        ]);
+        return (new FastExcel($data))->download('file.xlsx');
     }
 
 }

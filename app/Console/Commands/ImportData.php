@@ -8,6 +8,7 @@ use App\Data;
 use App\Department;
 use App\Gift;
 use App\Order;
+use App\Status;
 use App\Referrer;
 use App\Region;
 use App\Age;
@@ -16,6 +17,7 @@ use App\SaleChannel;
 use App\Time;
 use App\Vehicle;
 use App\VehicleBrand;
+use App\VehicleType;
 use App\VehicleModel;
 use App\VehicleYearCategory;
 use Illuminate\Console\Command;
@@ -107,10 +109,25 @@ class ImportData extends Command
      * @return Order
      */
     private function processExcelLine($line) {
-        if( Order::where('isn', $line[Data::MAP_FIELDS['isn']])->first() !== null ) {
+        $query = Order::where('isn', $line[Data::MAP_FIELDS['isn']])->first();
+        if(isset($query->id) && $query->id != '') {
             echo "\torder already exists\n";
+            print $line[Data::MAP_FIELDS['isn']].'====id==='.$query->id;
             return null;
         }
+
+//        $query = Order::where('isn', $line[Data::MAP_FIELDS['isn']])->first();
+//        if($query == null){
+//            print 'null';
+//        }
+        //print $line[Data::MAP_FIELDS['isn']].'='.$query;exit();]
+        //print 'insert';exit();
+
+//        if( Order::where('isn', $line[Data::MAP_FIELDS['isn']])->first() !== null) {
+//            echo "\torder already exists\n";
+//            return null;
+//        }
+
         // insert basic order data
         $order = $this->fill_order($line);
 
@@ -149,6 +166,22 @@ class ImportData extends Command
             $referrer = Referrer::where('name', $line[Data::MAP_FIELDS['referrer']])->first()
                 ?? Referrer::create(['name' => $line[Data::MAP_FIELDS['referrer']]]);
             $order->referrer_id = $referrer->id;
+        }
+
+        if ( $line[Data::MAP_FIELDS['new']] != '' ) {
+            $status = Status::where('name', 'Новый')->first()
+                ?? Status::create(['name' => 'Новый']);
+            $order->status_id = $status->id;
+        }
+        if ( $line[Data::MAP_FIELDS['active']] != '' ) {
+            $status = Status::where('name', 'Действующий')->first()
+                ?? Status::create(['name' => 'Действующий']);
+            $order->status_id = $status->id;
+        }
+        if ( $line[Data::MAP_FIELDS['returned']] != '' ) {
+            $status = Status::where('name', 'Вернувшийся')->first()
+                ?? Status::create(['name' => 'Вернувшийся']);
+            $order->status_id = $status->id;
         }
 
         // insert region
@@ -191,7 +224,8 @@ class ImportData extends Command
             $line[Data::MAP_FIELDS['vehicle_brand']],
             $line[Data::MAP_FIELDS['vehicle_model']],
             $line[Data::MAP_FIELDS['vehicle_year_category']],
-            $line[Data::MAP_FIELDS['vehicle_year']]
+            $line[Data::MAP_FIELDS['vehicle_year']],
+            $line[Data::MAP_FIELDS['vehicle_type']]
         );
 
         $order->vehicle_id = $vehicle->id;
@@ -219,7 +253,7 @@ class ImportData extends Command
         return $order;
     }
 
-    private function fill_vehicle ($_brand, $_model, $_year_category, $_year) {
+    private function fill_vehicle ($_brand, $_model, $_year_category, $_year,$_type) {
 
         $vehicle = Vehicle::whereHas('vehicle_brand', function (Builder $query) use ($_brand, $_model) {
 
@@ -241,9 +275,16 @@ class ImportData extends Command
         else
             $vehicle = new Vehicle();
 
+        $type = VehicleType::where('name', $_type)->first()
+            ?? new VehicleType([
+                'name' => $_type
+            ]);
+        $type->save();
+
         $brand = VehicleBrand::where('name', $_brand)->first()
             ?? new VehicleBrand([
-                'name' => $_brand
+                'name' => $_brand,
+                'vehicle_type_id' => $type->id
             ]);
         $brand->save();
 
@@ -252,7 +293,8 @@ class ImportData extends Command
         $model = VehicleModel::where('name', $_model)->first()
             ?? new VehicleModel([
                 'name' => $_model,
-                'vehicle_brand_id' => $brand->id
+                'vehicle_brand_id' => $brand->id,
+                'vehicle_type_id' => $type->id
             ]);
 
 //        $model->vehicle_brand()->addBinding($brand);
@@ -272,6 +314,7 @@ class ImportData extends Command
         $vehicle->vehicle_brand_id = $brand->id;
         $vehicle->vehicle_model_id = $model->id;
         $vehicle->year = $_year;
+        $vehicle->vehicle_type_id = $type->id;
 
         $vehicle->save();
 

@@ -63,10 +63,10 @@ class SeparateSources extends Command
 
 
         //remove first line
-        $rows = array_slice($rows, 1);
+        //$rows = array_slice($rows, 1);
 
         //loop through file and split every 1000 lines
-        $parts = (array_chunk($rows, 500));
+        $parts = (array_chunk($rows, 30000));   // 500
         $i = 1;
         foreach($parts as $part) {
             foreach ($part as $key => $item){

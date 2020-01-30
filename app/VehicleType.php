@@ -4,9 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class VehicleBrand extends Model
+class Vehicletype extends Model
 {
-    protected $fillable = ['name','vehicle_type_id'];
+    protected $fillable = ['name'];
+    protected $table = 'vehicle_types';
+
     public function vehicles(){
         return $this->hasMany(Vehicle::class);
     }

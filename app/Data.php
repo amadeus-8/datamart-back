@@ -57,6 +57,7 @@ class Data extends Model
         "client_isn" => "ISN страхователя",
         "vehicle_brand" => "Марка ТС",
         "vehicle_model" => "Модель ТС",
+        "vehicle_type" => "Тип ТС",
         "vehicle_year" => "Год выпуска ТС",
         "vehicle_year_category" => "Категория года выпуска ТС"
     ];
