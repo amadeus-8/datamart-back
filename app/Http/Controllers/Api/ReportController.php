@@ -355,19 +355,22 @@ class ReportController extends Controller
                 ->selectRaw(self::GETFIELDS)    //GETFIELDSPREV
                 ->get();
 
-            if (!in_array($request->from_date.'-'.$request->to_date, $labels)) {
-                array_push($labels, $request->from_date.'-'.$request->to_date);
+            $labelDate = date('d.m.Y',strtotime($request->from_date)).' - '.date('d.m.Y',strtotime($request->to_date));
+            if (!in_array($labelDate, $labels)) {
+                array_push($labels, $labelDate);
             }
 
             if (!in_array('доля', $labels)) {
                 array_push($labels, 'доля');
             }
 
-            $fromPrev = str_replace('-','.',$this->minusOneYear($request->from_date));
-            $toPrev = str_replace('-','.',$this->minusOneYear($request->to_date));
+            $fromPrev = str_replace('.','-',$this->minusOneYear($request->from_date));
+            $toPrev = str_replace('.','-',$this->minusOneYear($request->to_date));
 
-            if (!in_array($fromPrev.'-'.$toPrev, $labels)) {
-                array_push($labels, $fromPrev.'-'.$toPrev);
+            $labelSDate = date('d.m.Y',strtotime($fromPrev)).' - '.date('d.m.Y',strtotime($toPrev));
+
+            if (!in_array($labelSDate, $labels)) {
+                array_push($labels, $labelSDate);
             }
 
             if (!in_array(' доля ', $labels)) {
