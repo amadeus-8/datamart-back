@@ -285,10 +285,10 @@ class ReportController extends Controller
                         ->where($verticalQuery, $v->id)
                         ->selectRaw(self::GETFIELDS)
                         ->get();
-                    if (!in_array('', $labels)) {
-                        array_push($labels, '');
+                    if (!in_array(Data::MAP_FIELDS[$request->values], $labels)) {
+                        array_push($labels, Data::MAP_FIELDS[$request->values]);
                     }
-                    $data[$v->name] = $order[0];
+                    $data[$v->name] = $order;
 
 //  Export to EXCELL
 //                    if(isset($request->export) && $request->export != '') {
@@ -305,6 +305,8 @@ class ReportController extends Controller
 //        if(isset($request->export) && $request->export != '') {
 //            return self::getExport(collect($list));
 //        }
+
+        //print '<pre>';print_r($data);print '</pre>';exit();
 
         return response()->json([
             'property' => $property,
@@ -355,8 +357,10 @@ class ReportController extends Controller
                 ->selectRaw(self::GETFIELDS)    //GETFIELDSPREV
                 ->get();
 
-            if (!in_array($request->from_date.'-'.$request->to_date, $labels)) {
-                array_push($labels, $request->from_date.'-'.$request->to_date);
+            $labelData = date('d.m.Y',strtotime($request->from_date)).' - '.date('d.m.Y',strtotime($request->to_date));
+
+            if (!in_array($labelData, $labels)) {
+                array_push($labels, $labelData);
             }
 
             if (!in_array('доля', $labels)) {
@@ -366,8 +370,8 @@ class ReportController extends Controller
             $fromPrev = str_replace('-','.',$this->minusOneYear($request->from_date));
             $toPrev = str_replace('-','.',$this->minusOneYear($request->to_date));
 
-            if (!in_array($fromPrev.'-'.$toPrev, $labels)) {
-                array_push($labels, $fromPrev.'-'.$toPrev);
+            if (!in_array($fromPrev.' - '.$toPrev, $labels)) {
+                array_push($labels, $fromPrev.' - '.$toPrev);
             }
 
             if (!in_array(' доля ', $labels)) {

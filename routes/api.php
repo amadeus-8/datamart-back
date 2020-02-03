@@ -70,6 +70,14 @@ Route::group([
        ]);
     });
 
+    Route::get('get_clients_status', function() {
+       return response()->json(\App\Status::select('id', 'name')->get());
+    });
+
+    Route::get('get_ages_category', function(){
+       return response()->json(\App\Age::select('id', 'name')->get());
+    });
+
     Route::post('/set_filterset', 'ReportController@setFilterSet');
 
     //Route::post('/create_summary_table', 'ReportController@createSummaryTable');
