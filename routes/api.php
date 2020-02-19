@@ -39,6 +39,7 @@ Route::group([
 
     Route::post('get_pivot_report', 'ReportController@getPivotReport');
     Route::post('get_comparative_report', 'ReportController@getComparativeReport');
+    Route::post('get_chart_report', 'ReportController@getChartReport');
 
     Route::post('get_regions_report_data', 'ReportController@getRegionsReport');
 

@@ -188,7 +188,7 @@ class ReportController extends Controller
                 }
                 $data[0] = $items;
                 $data[1] = 'referrer_id';
-                $data[2] = 'Referrer';
+                $data[2] = 'Канал привлечения';
             break;
             case 'status':
                 if(isset($request->status_id ) && $request->status_id != null && $request->status_id != 'все'){
@@ -397,6 +397,43 @@ class ReportController extends Controller
             'data' => $data,
             'labels' => $labels,
             'bottomData' => $bottomD
+        ]);
+    }
+
+    public function getChartReport(Request $request) {
+        ini_set('max_execution_time', 150000);
+        $firstFilter = isset($request->columns) && $request->columns != '' && $request->columns != null ? $request->columns : 'region';
+
+        $filterData = self::getFilterData($firstFilter,$request);
+        $vertical = $filterData[0];
+        $verticalQuery = $filterData[1];
+
+        $xaxis = [];
+        $series = [];
+        $labels = [];
+        foreach ($vertical as $v) {
+            $order = self::getFilteredOrdersQuery($request)
+                ->where($verticalQuery, $v->id)
+                ->selectRaw(self::GETFIELDS)
+                ->get();
+            if (!in_array('', $labels)) {
+                array_push($labels, '');
+            }
+            $xaxis[] = $v->name;
+            for($i=0;$i<count(self::GETFIELDSSUM);$i++){
+                $series[self::GETFIELDSSUM[$i]][] = $order[0]->{self::GETFIELDSSUM[$i]} != null ? $order[0]->{self::GETFIELDSSUM[$i]} : 0;
+            }
+        }
+
+        for($i=0;$i<count(self::GETFIELDSSUM);$i++){
+            $seriess[$i]['data'] = $series[self::GETFIELDSSUM[$i]];
+            $seriess[$i]['value'] = self::GETFIELDSSUM[$i];
+            $seriess[$i]['name'] = Data::MAP_FIELDS[self::GETFIELDSSUM[$i]];
+        }
+
+        return response()->json([
+            'xaxis' => $xaxis,
+            'series' => $seriess,
         ]);
     }
 
