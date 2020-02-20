@@ -36,6 +36,7 @@ Route::group([
 
     Route::post('get_age_chart_data', 'ReportController@getAgeCategoryChartData');
     Route::post('get_ages_data', 'ReportController@getTest');
+    Route::post('get_saved_data', 'ReportController@getSavedData');
 
     Route::post('get_pivot_report', 'ReportController@getPivotReport');
     Route::post('get_comparative_report', 'ReportController@getComparativeReport');

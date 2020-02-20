@@ -314,7 +314,7 @@ class ReportController extends Controller
             'labels' => $labels,
         ];
 
-        $query = $this->saveQuery('pivot_report',$data_query,$request->all()); // Сохранение в базу
+        $query = $this->saveQuery($request->query_type,$data_query,$request->all()); // Сохранение в базу
         if($query) {
             $data_query['id'] = Auth::id();
             return response()->json($data_query);
@@ -404,7 +404,7 @@ class ReportController extends Controller
             'bottomData' => $bottomD
         ];
 
-        $query = $this->saveQuery('comparative_report',$data_query,$request->all()); // Сохранение в базу
+        $query = $this->saveQuery($request->query_type,$data_query,$request->all()); // Сохранение в базу
         if($query) {
             $data_query['id'] = Auth::id();
             return response()->json($data_query);
@@ -465,6 +465,18 @@ class ReportController extends Controller
         } else {
             return false;
         }
+    }
+
+    public function getSavedData(Request $request){
+        $query = Query::select('result_json','id')
+            ->where(['query_type' => $request->type,'user_id' => Auth::id()])
+            //->whereBetween('created_at', [$request->from_date, $request->to_date])
+            ->take(3)->get();
+        $result = [];
+        foreach($query as $q){
+            $result[] = json_decode($q->result_json);
+        }
+        return response()->json($result);
     }
 
     private function numberFormat($number){
