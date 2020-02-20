@@ -471,6 +471,7 @@ class ReportController extends Controller
         $query = Query::select('result_json','id')
             ->where(['query_type' => $request->type,'user_id' => Auth::id()])
             //->whereBetween('created_at', [$request->from_date, $request->to_date])
+                ->orderBy('created_at','desc')
             ->take(3)->get();
         $result = [];
         foreach($query as $q){
