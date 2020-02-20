@@ -17,8 +17,8 @@ class CreateQueriesTable extends Migration
             $table->bigIncrements('id');
             $table->bigInteger('user_id')->unsigned();
             $table->string('query_type',20);
-            $table->text('query_json');
             $table->text('query_filter_json');
+            $table->text('result_json');
             $table->timestamps();
         });
     }

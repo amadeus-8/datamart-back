@@ -458,8 +458,8 @@ class ReportController extends Controller
         $query = new Query;
         $query->user_id = Auth::id();
         $query->query_type = $type;
-        $query->query_json = json_encode($data_query);
         $query->query_filter_json = json_encode($request);
+        $query->result_json = json_encode($data_query);
         if($query->save()){
             return true;
         } else {
