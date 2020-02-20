@@ -14,8 +14,10 @@ use App\SaleCenter;
 use App\Department;
 use App\SaleChannel;
 use App\Referrer;
+use Auth;
 use App\Agent;
 use App\Time;
+use App\Query;
 use function foo\func;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -306,13 +308,19 @@ class ReportController extends Controller
 //            return self::getExport(collect($list));
 //        }
 
-        //print '<pre>';print_r($data);print '</pre>';exit();
-
-        return response()->json([
+        $data_query = [
             'property' => $property,
             'data' => $data,
             'labels' => $labels,
-        ]);
+        ];
+
+        $query = $this->saveQuery('pivot_report',$data_query,$request->all()); // Сохранение в базу
+        if($query) {
+            $data_query['id'] = Auth::id();
+            return response()->json($data_query);
+        }
+
+        return response()->json($data_query);
     }
 
     public function getComparativeReport(Request $request){
@@ -388,16 +396,19 @@ class ReportController extends Controller
 
             $data[$v->name] = array($order[0],$firstDolya,$orderPrevious[0],$secondDolya,$comparative);
         }
-//        print '<pre>';print_r($data);print '</pre>';
-//        print '<pre>';print_r($bottomD);print '</pre>';exit();
         //$data[] = $data;
-
-        return response()->json([
+        $data_query = [
             'property' => $property,
             'data' => $data,
             'labels' => $labels,
             'bottomData' => $bottomD
-        ]);
+        ];
+
+        $query = $this->saveQuery('comparative_report',$data_query,$request->all()); // Сохранение в базу
+        if($query) {
+            $data_query['id'] = Auth::id();
+            return response()->json($data_query);
+        }
     }
 
     public function getChartReport(Request $request) {
@@ -431,10 +442,29 @@ class ReportController extends Controller
             $seriess[$i]['name'] = Data::MAP_FIELDS[self::GETFIELDSSUM[$i]];
         }
 
-        return response()->json([
+        $data_query = [
             'xaxis' => $xaxis,
             'series' => $seriess,
-        ]);
+        ];
+        $query = $this->saveQuery($request->query_type,$data_query,$request->all()); // Сохранение в базу
+        if($query) {
+            $data_query['id'] = Auth::id();
+            return response()->json($data_query);
+        }
+    }
+
+    public function saveQuery($type,$data_query,$request)
+    {
+        $query = new Query;
+        $query->user_id = Auth::id();
+        $query->query_type = $type;
+        $query->query_json = json_encode($data_query);
+        $query->query_filter_json = json_encode($request);
+        if($query->save()){
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private function numberFormat($number){
