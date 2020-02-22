@@ -375,8 +375,10 @@ class ReportController extends Controller
                 array_push($labels, 'доля');
             }
 
-            $fromPrev = str_replace('-','.',$this->minusOneYear($request->from_date));
-            $toPrev = str_replace('-','.',$this->minusOneYear($request->to_date));
+            $fromPrev = explode('.',$this->minusOneYear($request->from_date));
+            $fromPrev = $fromPrev[2].'.'.$fromPrev[1].'.'.$fromPrev[0];
+            $toPrev = explode('.',$this->minusOneYear($request->to_date));
+            $toPrev = $toPrev[2].'.'.$toPrev[1].'.'.$toPrev[0];
 
             if (!in_array($fromPrev.' - '.$toPrev, $labels)) {
                 array_push($labels, $fromPrev.' - '.$toPrev);
