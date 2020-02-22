@@ -425,22 +425,27 @@ class ReportController extends Controller
         foreach ($vertical as $v) {
             $order = self::getFilteredOrdersQuery($request)
                 ->where($verticalQuery, $v->id)
-                ->selectRaw(self::GETFIELDS)
+                ->selectRaw('sum(orders.'.$request->values.') as '.$request->values)     //self::GETFIELDS
                 ->get();
             if (!in_array('', $labels)) {
                 array_push($labels, '');
             }
             $xaxis[] = $v->name;
-            for($i=0;$i<count(self::GETFIELDSSUM);$i++){
-                $series[self::GETFIELDSSUM[$i]][] = $order[0]->{self::GETFIELDSSUM[$i]} != null ? $order[0]->{self::GETFIELDSSUM[$i]} : 0;
-            }
+//            for($i=0;$i<count(self::GETFIELDSSUM);$i++){
+//                $series[self::GETFIELDSSUM[$i]][] = $order[0]->{self::GETFIELDSSUM[$i]} != null ? $order[0]->{self::GETFIELDSSUM[$i]} : 0;
+//            }
+            $series[$request->values][] = $order[0]->{$request->values} != null ? intval($order[0]->{$request->values}) : 0;
         }
 
-        for($i=0;$i<count(self::GETFIELDSSUM);$i++){
-            $seriess[$i]['data'] = $series[self::GETFIELDSSUM[$i]];
-            $seriess[$i]['value'] = self::GETFIELDSSUM[$i];
-            $seriess[$i]['name'] = Data::MAP_FIELDS[self::GETFIELDSSUM[$i]];
-        }
+//        for($i=0;$i<count(self::GETFIELDSSUM);$i++){
+//            $seriess[$i]['data'] = $series[self::GETFIELDSSUM[$i]];
+//            $seriess[$i]['value'] = self::GETFIELDSSUM[$i];
+//            $seriess[$i]['name'] = Data::MAP_FIELDS[self::GETFIELDSSUM[$i]];
+//        }
+
+        $seriess[0]['data'] = $series[$request->values];
+        $seriess[0]['value'] = $request->values;
+        $seriess[0]['name'] = Data::MAP_FIELDS[$request->values];
 
         $data_query = [
             'xaxis' => $xaxis,
