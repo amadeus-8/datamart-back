@@ -67,8 +67,8 @@ Route::group([
 //            'agents' => \App\Agent::all(),
             'referrers' => \App\Referrer::select('id', 'name')->get(),
             'departments' => \App\Department::select('id', 'name')->orderBy('name')->get(),
-            'sale_channels' => \App\SaleCenter::select('id', 'name')->orderBy('name')->get(),
-            'sale_centers' => \App\SaleChannel::select('id', 'name')->orderBy('name')->get()
+            'sale_channels' => \App\SaleChannel::select('id', 'name')->orderBy('name')->get(),
+            'sale_centers' => \App\SaleCenter::select('id', 'name')->orderBy('name')->get()
        ]);
     });
 

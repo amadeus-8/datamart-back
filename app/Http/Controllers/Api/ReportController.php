@@ -65,6 +65,9 @@ class ReportController extends Controller
             || ( isset($request->age_category) && $request->age_category !== 'все' && $request->age_category != null))
             $orders = self::filterByClient($orders,$request);
 
+        if (isset($request->age_category) && $request->age_category != 'все' && $request->age_category != null)
+            $orders = $orders->where('age_id',$request->age_category);
+
         if (isset($request->vehicle_year_category) && $request->vehicle_year_category != null
             || isset($request->vehicle_brand) && $request->vehicle_brand != null
             || isset($request->vehicle_model) && $request->vehicle_model != null)
@@ -108,8 +111,8 @@ class ReportController extends Controller
             if (isset($request->region_id) && $request->region_id != null)
                 $query->where('region_id', $request->region_id);
 
-            if (isset($request->age_category) && $request->age_category != 'все' && $request->age_category != null)
-                $query->where('age_category', $request->age_category);
+//            if (isset($request->age_category) && $request->age_category != 'все' && $request->age_category != null)
+//                $query->where('age_category', $request->age_category);
 
             if (isset($request->insurance_class) && $request->age_category != 'все')
                 $query->where('insurance_class', $request->insurance_class);
@@ -136,7 +139,12 @@ class ReportController extends Controller
                 if (isset($request->region_id ) && $request->region_id != null && $request->region_id != 'все') {
                     $items[0] = Region::findOrFail($request->region_id);
                 } else {
-                    $items = Region::all();
+                    if(isset($request->sale_center_id) && $request->sale_center_id != ''){
+                        $sales_center = SaleCenter::find($request->sale_center_id);
+                        $items[0] = Region::findOrFail($sales_center->region_id);
+                    } else {
+                        $items = Region::all();
+                    }
                 }
                 $data[0] = $items;
                 $data[1] = 'region_d';
@@ -144,7 +152,7 @@ class ReportController extends Controller
             break;
             case 'age':
                 if(isset($request->age_category) && $request->age_category != null && $request->age_category != 'все'){
-                    $items[0] = Age::where('name',$request->age_category)->first();
+                    $items[0] = Age::where('id',$request->age_category)->first();   //name
                 } else {
                     $items = Age::all();
                 }
@@ -156,7 +164,11 @@ class ReportController extends Controller
                 if($request->sale_center_id != null && $request->sale_center_id != 'все'){
                     $items[0] = SaleCenter::findOrFail($request->sale_center_id);
                 } else {
-                    $items = SaleCenter::all();
+                    if(isset($request->region_id) && $request->region_id != ''){
+                        $items = SaleCenter::where('region_id',$request->region_id)->get();
+                    } else {
+                        $items = SaleCenter::all();
+                    }
                 }
                 $data[0] = $items;
                 $data[1] = 'sale_center_id';
