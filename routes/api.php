@@ -33,6 +33,10 @@ Route::group([
 
 ], function () {
     Route::post('get_general_report', 'ReportController@getReport');
+    Route::post('/get_users', 'ReportController@getUsers');
+    Route::post('/add_user', 'ReportController@addUser');
+    Route::post('/change_status', 'ReportController@changeUserStatus');
+    Route::post('/delete_user', 'ReportController@deleteUser');
 
     Route::post('get_age_chart_data', 'ReportController@getAgeCategoryChartData');
     Route::post('get_ages_data', 'ReportController@getTest');

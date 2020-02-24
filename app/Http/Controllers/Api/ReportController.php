@@ -14,6 +14,7 @@ use App\SaleCenter;
 use App\Department;
 use App\SaleChannel;
 use App\Referrer;
+use App\User;
 use Auth;
 use App\Agent;
 use App\Time;
@@ -22,6 +23,7 @@ use function foo\func;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Rap2hpoutre\FastExcel\FastExcel;
 
 
@@ -519,6 +521,67 @@ class ReportController extends Controller
             }
         }
         return $result;
+    }
+
+    public function getUsers(){
+        $result = null;
+        $success = false;
+        $error = '';
+        if(Auth::check() && Auth::user()->status == 1){
+            $result = User::orderBy('created_at','desc')->get();
+            if($result){
+                $success = true;
+            }
+        } else {
+            $error = 'У Вас нет прав для просмотра этого раздела.Sorry';
+        }
+        return response()->json([
+            'success' => $success,
+            'result' => $result,
+            'error' => $error
+        ]);
+    }
+
+    public function addUser(Request $request){
+        $result = null;
+        $success = false;
+        $error = null;
+        if(Auth::check() && Auth::user()->status == 1){
+            $checkUser = User::where('email',$request->email)->first();
+            if($checkUser == null) {
+                $user = new User;
+                $user->name = $request->name;
+                $user->email = $request->email;
+                $user->password = Hash::make($request->password);
+                if ($user->save()) {
+                    $success = true;
+                }
+            } else {
+                $error = 'В базе уже есть пользователь с таким электронным адресом';
+            }
+        }
+        return response()->json(['success' => $success, 'error' => $error]);
+    }
+
+    public function changeUserStatus(Request $request){
+        if(Auth::check() && Auth::user()->status == 1){
+            $user = User::find($request->id);
+            $user->status = $user->status == 1 ? 0 : 1;
+            if ($user->update()) {
+                return response()->json(['success' => true]);
+            }
+        }
+    }
+
+    public function deleteUser(Request $request){
+        if(Auth::check() && Auth::user()->status == 1){
+            $user = User::find($request->id);
+            if ($user->delete()) {
+                return response()->json(['success' => true]);
+            } else {
+                return response()->json(['success' => false]);
+            }
+        }
     }
 
     private function minusOneYear($date){
