@@ -510,15 +510,22 @@ class ReportController extends Controller
     private function createComparativeData($orderFirst,$orderSecond,$comparative = ''){
         $lineSums = self::GETFIELDSSUM;
         foreach($lineSums as $name){
-            if(intval($orderFirst[0][$name]) != 0 && $orderSecond[0][$name]) {
+            if(intval($orderFirst[0][$name]) != 0 && intval($orderSecond[0][$name]) != 0) {
                 if($comparative == 1) {
                     $result[$name] = $this->numberFormat(((intval($orderFirst[0][$name]) / intval($orderSecond[0][$name]))-1) * 100);
                 } else {
                     $result[$name] = $this->numberFormat((intval($orderFirst[0][$name]) / intval($orderSecond[0][$name])) * 100);
                 }
-
             } else {
-                $result[$name] = intval($orderFirst[0][$name]);
+                if($comparative == 1) {
+                    if(intval($orderSecond[0][$name]) == 0) {
+                        $result[$name] = 0;
+                    } else if(intval($orderFirst[0][$name]) == 0) {
+                        $result[$name] = -100;
+                    }
+                } else {
+                    $result[$name] = intval($orderFirst[0][$name]);
+                }
             }
         }
         return $result;
@@ -538,7 +545,7 @@ class ReportController extends Controller
             $result = [];
             //$error = 'У Вас нет прав для просмотра этого раздела.Sorry';
         }
-        $user = ['name' => $user->name,'email' => $user->email,'password' => ''];
+        $user = ['name' => $user->name,'email' => $user->email,'password' => '','confirmPassword' => ''];
         return response()->json([
             'success' => $success,
             'result' => $result,
