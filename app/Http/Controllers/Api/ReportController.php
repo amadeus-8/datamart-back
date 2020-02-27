@@ -525,19 +525,23 @@ class ReportController extends Controller
 
     public function getUsers(){
         $result = null;
-        $success = false;
+        $success = true;
         $error = '';
+        $user = Auth::user();
         if(Auth::check() && Auth::user()->status == 1){
             $result = User::orderBy('created_at','desc')->get();
-            if($result){
-                $success = true;
-            }
+//            if($result){
+//                $success = true;
+//            }
         } else {
-            $error = 'У Вас нет прав для просмотра этого раздела.Sorry';
+            $result = [];
+            //$error = 'У Вас нет прав для просмотра этого раздела.Sorry';
         }
+        $user = ['name' => $user->name,'email' => $user->email,'password' => ''];
         return response()->json([
             'success' => $success,
             'result' => $result,
+            'currentUser' => $user,
             'error' => $error
         ]);
     }
@@ -569,6 +573,20 @@ class ReportController extends Controller
             $user->status = $user->status == 1 ? 0 : 1;
             if ($user->update()) {
                 return response()->json(['success' => true]);
+            }
+        }
+    }
+
+    public function changeUserData(Request $request){
+        if(Auth::check()){
+            $user = User::find(Auth::id());
+            $user->name = $request->user['name'];
+            $user->email = $request->user['email'];
+            $user->password = Hash::make($request->user['password']);
+            if ($user->update()) {
+                return response()->json(['success' => true]);
+            } else {
+                return response()->json(['success' => false]);
             }
         }
     }

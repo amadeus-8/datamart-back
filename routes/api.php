@@ -37,6 +37,7 @@ Route::group([
     Route::post('/add_user', 'ReportController@addUser');
     Route::post('/change_status', 'ReportController@changeUserStatus');
     Route::post('/delete_user', 'ReportController@deleteUser');
+    Route::post('/change_user_data', 'ReportController@changeUserData');
 
     Route::post('get_age_chart_data', 'ReportController@getAgeCategoryChartData');
     Route::post('get_ages_data', 'ReportController@getTest');
