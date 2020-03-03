@@ -21,7 +21,8 @@ Route::post('/importReports', 'HomeController@feedFromFile')->name('feed_from_fi
 Route::get('/test', 'ReportController@getComparativeReport');
 Route::get('/test2', 'ReportController@getPivotReport');
 Route::get('/export', 'ReportController@getExport');
-
+Route::get('/get_saved_data', 'ReportController@getSavedData');
+Route::get('/get_saved', 'ReportController@getSaved');
 
 //Route::get('getkbms', function () {
 //    foreach (App\Client::select('insurance_class')->groupBy('insurance_class')->get() as $kbm) {
