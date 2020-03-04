@@ -527,11 +527,20 @@ class ReportController extends Controller
                 if($comparative == 1) {
                     if(intval($orderSecond[0][$name]) == 0) {
                         $result[$name] = 0;
-                    } else if(intval($orderFirst[0][$name]) == 0) {
+                    } elseif(intval($orderFirst[0][$name]) == 0) {
                         $result[$name] = -100;
+                    } else {
+                        $result[$name] = 0;
                     }
                 } else {
-                    $result[$name] = intval($orderFirst[0][$name]);
+                    if(intval($orderSecond[0][$name]) != 0 && intval($orderFirst[0][$name]) == 0) {
+                        $result[$name] = intval($orderSecond[0][$name]);
+                    } elseif(intval($orderFirst[0][$name]) != 0 && intval($orderSecond[0][$name]) == 0) {
+                        $result[$name] = intval($orderFirst[0][$name]);
+                    } else {
+                        $result[$name] = 0;
+                    }
+                    //$result[$name] = intval($orderFirst[0][$name]);
                 }
             }
         }
