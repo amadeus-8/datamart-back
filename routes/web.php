@@ -18,11 +18,12 @@ Route::get('/', 'HomeController@index')->name('home');
 Route::resource('users', 'UserController');
 
 Route::post('/importReports', 'HomeController@feedFromFile')->name('feed_from_file');
-Route::get('/test', 'ReportController@getComparativeReport');
-Route::get('/test2', 'ReportController@getPivotReport');
-Route::get('/export', 'ReportController@getExport');
-Route::get('/get_saved_data', 'ReportController@getSavedData');
-Route::get('/get_saved', 'ReportController@getSaved');
+//Route::get('/test', 'ReportController@getComparativeReport');
+//Route::get('/test2', 'ReportController@getPivotReport');
+//Route::get('/export', 'ReportController@getExport');
+//Route::get('/get_saved_data', 'ReportController@getSavedData');
+//Route::get('/get_saved', 'ReportController@getSaved');
+//Route::get('/edit', 'ReportController@edits');
 
 //Route::get('getkbms', function () {
 //    foreach (App\Client::select('insurance_class')->groupBy('insurance_class')->get() as $kbm) {

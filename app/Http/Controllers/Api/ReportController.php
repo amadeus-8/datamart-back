@@ -15,6 +15,7 @@ use App\Department;
 use App\SaleChannel;
 use App\Referrer;
 use App\User;
+use App\SaleCenterDepartment;
 use Auth;
 use App\Agent;
 use App\Time;
@@ -144,6 +145,9 @@ class ReportController extends Controller
                     if(isset($request->sale_center_id) && $request->sale_center_id != ''){
                         $sales_center = SaleCenter::find($request->sale_center_id);
                         $items[0] = Region::findOrFail($sales_center->region_id);
+                    } elseif(isset($request->department_id) && $request->department_id != ''){
+                        $department = Department::find($request->department_id);
+                        $items[0] = Region::findOrFail($department->region_id);
                     } else {
                         $items = Region::all();
                     }
@@ -168,6 +172,13 @@ class ReportController extends Controller
                 } else {
                     if(isset($request->region_id) && $request->region_id != ''){
                         $items = SaleCenter::where('region_id',$request->region_id)->get();
+                    } elseif(isset($request->department_id) && $request->department_id != ''){
+                        $sale_center_department = SaleCenterDepartment::select('sale_center_id')->where('department_id',$request->department_id)->get();
+                        $ids = array();
+                        foreach($sale_center_department as $sd){
+                            $ids[] = $sd->sale_center_id;
+                        }
+                        $items = SaleCenter::whereIn('id',$ids)->get();
                     } else {
                         $items = SaleCenter::all();
                     }
@@ -189,9 +200,20 @@ class ReportController extends Controller
             case 'department':
                 if($request->department_id != null && $request->department_id != 'все'){
                     $items[0] = Department::findOrFail($request->department_id);
+                } elseif(isset($request->sale_center_id) && $request->sale_center_id != ''){
+                    $sale_center_department = SaleCenterDepartment::select('department_id')->where('sale_center_id',$request->sale_center_id)->get();
+                    $ids = array();
+                    foreach($sale_center_department as $sd){
+                        $ids[] = $sd->department_id;
+                    }
+                    $items = Department::whereIn('id',$ids)->get();
                 } else {
                     $items = Department::all();
                 }
+
+
+
+
                 $data[0] = $items;
                 $data[1] = 'department_id';
                 $data[2] = 'Департамент';
@@ -267,6 +289,7 @@ class ReportController extends Controller
         $labels = [];
         $list = [];
         $list_h = [];
+        $total = 0;
         foreach ($vertical as $v) {
             $sums = [];
             $count = [];
@@ -301,9 +324,9 @@ class ReportController extends Controller
                         ->where($verticalQuery, $v->id)
                         ->selectRaw(self::GETFIELDS)
                         ->get();
-                    if (!in_array(Data::MAP_FIELDS[$request->values], $labels)) {
-                        array_push($labels, Data::MAP_FIELDS[$request->values]);
-                    }
+//                    if (!in_array(Data::MAP_FIELDS[$request->values], $labels)) {
+//                        array_push($labels, Data::MAP_FIELDS[$request->values]);
+//                    }
                     $data[$v->name] = $order;
 
 //  Export to EXCELL
@@ -533,9 +556,10 @@ class ReportController extends Controller
                         $result[$name] = 0;
                     }
                 } else {
-                    if(intval($orderSecond[0][$name]) != 0 && intval($orderFirst[0][$name]) == 0) {
-                        $result[$name] = intval($orderSecond[0][$name]);
-                    } elseif(intval($orderFirst[0][$name]) != 0 && intval($orderSecond[0][$name]) == 0) {
+//                    if(intval($orderSecond[0][$name]) != 0 && intval($orderFirst[0][$name]) == 0) {
+//                        $result[$name] = intval($orderSecond[0][$name]);
+//                    } else
+                    if(intval($orderFirst[0][$name]) != 0 && intval($orderSecond[0][$name])) {
                         $result[$name] = intval($orderFirst[0][$name]);
                     } else {
                         $result[$name] = 0;
@@ -633,5 +657,4 @@ class ReportController extends Controller
     public function getExport($data){
         return (new FastExcel($data))->download('file.xlsx');
     }
-
 }

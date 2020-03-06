@@ -1,8 +1,16 @@
+<IfModule mod_headers.c>
+	Header set Access-Control-Allow-Origin 'origin-list'
+</IfModule>
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
     </IfModule>
 
+<IfModule mod_headers.c>
+	Header set Access-Control-Allow-Origin 'origin-list'
+</IfModule>
+
+	
     RewriteEngine On
 
     # Handle Authorization Header
