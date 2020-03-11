@@ -309,13 +309,13 @@ class ReportController extends Controller
                     }
                     $order[$h->name] = $order[$h->name][0];
 
-                    if(isset($request->export) && $request->export != '') {
-                        if ($i == 0) {
-                            $list_h[$property] = $v->name;
-                        }
-                        $list_h[$h->name] = self::numberFormat($order[$h->name]->vts_overall_sum);  // параметр принять
-                        $i++;
-                    }
+//                    if(isset($request->export) && $request->export != '') {
+//                        if ($i == 0) {
+//                            $list_h[$property] = $v->name;
+//                        }
+//                        $list_h[$h->name] = self::numberFormat($order[$h->name]->vts_overall_sum);  // параметр принять
+//                        $i++;
+//                    }
                 }
                 $data[$v->name] = $order;
             } else {
@@ -512,24 +512,22 @@ class ReportController extends Controller
     }
 
     public function getSavedData(Request $request){
+        ini_set('max_execution_time', 150000);
         if($request->take == ''){ $request->take = 3; }
-        $query = Query::select('result_json','id')
+        $query = Query::select('result_json','query_filter_json','id','created_at')
             ->where(['query_type' => $request->type,'user_id' => Auth::id()])
-            //->whereBetween('created_at', [$request->from_date, $request->to_date])
+            ->whereBetween('created_at', [$request->from_date.' 00:00:00', $request->to_date.' 23:59:59'])
             ->orderBy('created_at','desc')
             ->take($request->take)->get();
         $result = [];
         foreach($query as $q){
-            $result[] = json_decode($q->result_json);
+            $filter_json = json_decode($q->query_filter_json);
+            $json_result = json_decode($q->result_json);
+            $json_result->created_at = date('d.m.Y',strtotime($q->created_at));
+            $json_result->filter_values = $filter_json->values;
+            $result[] = $json_result;
         }
         return response()->json($result);
-    }
-
-    public function getSaved(){
-        $test = Region::get();
-        foreach($test as $test){
-            print $test->name;
-        }
     }
 
     private function numberFormat($number){
@@ -578,12 +576,8 @@ class ReportController extends Controller
         $user = Auth::user();
         if(Auth::check() && Auth::user()->status == 1){
             $result = User::orderBy('created_at','desc')->get();
-//            if($result){
-//                $success = true;
-//            }
         } else {
             $result = [];
-            //$error = 'У Вас нет прав для просмотра этого раздела.Sorry';
         }
         $user = ['name' => $user->name,'email' => $user->email,'password' => '','confirmPassword' => ''];
         return response()->json([
