@@ -298,6 +298,12 @@ class ReportController extends Controller
             if(count($horizontal) > 0) {
                 $order = [];
                 $i=0;
+                $itogo = [];
+
+                foreach(self::GETFIELDSSUM as $f) {
+                    $itogo[$f] = 0;
+                }
+
                 foreach ($horizontal as $h) {
                     $order[$h->name] = self::getFilteredOrdersQuery($request)
                         ->where($verticalQuery, $v->id)
@@ -316,6 +322,16 @@ class ReportController extends Controller
 //                        $list_h[$h->name] = self::numberFormat($order[$h->name]->vts_overall_sum);  // параметр принять
 //                        $i++;
 //                    }
+                    foreach(self::GETFIELDSSUM as $f) {
+                        $itogo[$f] = $itogo[$f] + $order[$h->name][$f];
+                    }
+                    $i++;
+                    if($i == count($horizontal)) {
+                        $order['Итого'] = $itogo;
+                        if (!in_array('Итого', $labels)) {
+                            array_push($labels, 'Итого');
+                        }
+                    }
                 }
                 $data[$v->name] = $order;
             } else {
