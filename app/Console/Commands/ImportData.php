@@ -13,6 +13,7 @@ use App\Referrer;
 use App\Region;
 use App\Age;
 use App\SaleCenter;
+use App\SaleCenterDepartment;
 use App\SaleChannel;
 use App\Time;
 use App\Vehicle;
@@ -154,11 +155,22 @@ class ImportData extends Command
             $order->sale_channel_id = $sale_channel->id;
         }
 
+        if ( $line[Data::MAP_FIELDS['city']] != '' ) {
+            // insert region
+            $region = Region::where('name', $line[Data::MAP_FIELDS['city']])->first()
+                ?? Region::create(['name' => $line[Data::MAP_FIELDS['city']]]);
+            $order->region_d = $region->id;
+        }
+
         // insert sale center
         if ( $line[Data::MAP_FIELDS['sale_center']] != '' ) {
             $sale_center = SaleCenter::where('name', $line[Data::MAP_FIELDS['sale_center']])->first()
                 ?? SaleCenter::create(['name' => $line[Data::MAP_FIELDS['sale_center']]]);
             $order->sale_center_id = $sale_center->id;
+            if($sale_center->region_id == null && isset($region->id)){
+                $sale_center->region_id = $region->id;
+                $sale_center->save();
+            }
         }
 
         // insert referrer
@@ -184,26 +196,23 @@ class ImportData extends Command
             $order->status_id = $status->id;
         }
 
-        // insert region
-        $region = Region::where('name', $line[Data::MAP_FIELDS['city']])->first()
-            ?? Region::create(['name' => $line[Data::MAP_FIELDS['city']]]);
-        $order->region_d = $region->id;
-
-        // insert age
-        $age = Age::where('name', $line[Data::MAP_FIELDS['age_category']])->first()
-            ?? Age::create(['name' => $line[Data::MAP_FIELDS['age_category']]]);
-        $order->age_id = $age->id;
+        if ( $line[Data::MAP_FIELDS['age_category']] != '' ) {
+            // insert age
+            $age = Age::where('name', $line[Data::MAP_FIELDS['age_category']])->first()
+                ?? Age::create(['name' => $line[Data::MAP_FIELDS['age_category']]]);
+            $order->age_id = $age->id;
+        }
 
         // insert client
         $client = Client::where('isn', $line[Data::MAP_FIELDS['isn']])->first()
             ?? Client::create([
-            'isn' => $line[Data::MAP_FIELDS['isn']],
-            'gender' => $line[Data::MAP_FIELDS['gender']],
-            'age' => $line[Data::MAP_FIELDS['age']] !== '' ? $line[Data::MAP_FIELDS['age']] : 0,
-            'age_category' => $line[Data::MAP_FIELDS['age_category']],
-            'insurance_class' => $line[Data::MAP_FIELDS['insurance_class']],
-            'region_id' => $region->id
-        ]);
+                'isn' => $line[Data::MAP_FIELDS['isn']],
+                'gender' => $line[Data::MAP_FIELDS['gender']],
+                'age' => $line[Data::MAP_FIELDS['age']] !== '' ? $line[Data::MAP_FIELDS['age']] : 0,
+                'age_category' => $line[Data::MAP_FIELDS['age_category']],
+                'insurance_class' => $line[Data::MAP_FIELDS['insurance_class']],
+                'region_id' => $region->id
+            ]);
         $order->client_id = $client->id;
         $order->age_category_name = $client->age_category;
 
@@ -212,6 +221,24 @@ class ImportData extends Command
             $department = Department::where('name', $line[Data::MAP_FIELDS['department']])->first()
                 ?? Department::create(['name' => $line[Data::MAP_FIELDS['department']], 'region_id' => $region->id]);
             $order->department_id = $department->id;
+            if(isset($sale_center->id)){
+                $sale_department = SaleCenterDepartment::where('department_id', $department->id)->first();
+                if($sale_department != null){
+                    if($sale_department->sale_center_id == null) {
+                        $sale_department->sale_center_id = $sale_center->id;
+                        $sale_department->department_name = $line[Data::MAP_FIELDS['department']];
+                        $sale_department->sale_center_name = $line[Data::MAP_FIELDS['sale_center']];
+                        $sale_department->save();
+                    }
+                } else {
+                    $sale_department = new SaleCenterDepartment;
+                    $sale_department->department_id = $department->id;
+                    $sale_department->sale_center_id = $sale_center->id;
+                    $sale_department->department_name = $line[Data::MAP_FIELDS['department']];
+                    $sale_department->sale_center_name = $line[Data::MAP_FIELDS['sale_center']];
+                    $sale_department->save();
+                }
+            }
         }
 
         // insert time
@@ -339,11 +366,11 @@ class ImportData extends Command
 
         $files = [];
         foreach ($files_in_folder as $file){
-            if(count($files) > 3)
-                break;
+            /*if(count($files) > 3)
+                break;*/
 
-            if(strpos($file, 'inprocess') !== false || strpos($file, '.DS_Store') !== false )
-                continue;
+//            if(strpos($file, 'inprocess') !== false || strpos($file, '.DS_Store') !== false )
+//                continue;
 
             array_push($files, $file);
         }

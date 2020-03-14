@@ -39,6 +39,7 @@ class SeparateSources extends Command
      */
     public function handle()
     {
+        ini_set('memory_limit','2000M');
         $files = Storage::files('importsource');
 
         foreach ($files as $item){
@@ -66,7 +67,7 @@ class SeparateSources extends Command
         //$rows = array_slice($rows, 1);
 
         //loop through file and split every 1000 lines
-        $parts = (array_chunk($rows, 30000));   // 500
+        $parts = (array_chunk($rows, 500));   // 500
         $i = 1;
         foreach($parts as $part) {
             foreach ($part as $key => $item){

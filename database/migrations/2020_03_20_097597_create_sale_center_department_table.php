@@ -16,9 +16,9 @@ class CreateSaleCenterDepartmentTable extends Migration
         Schema::create('sale_centers_department', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->bigInteger('department_id')->unsigned();
-            $table->bigInteger('sale_center_id')->unsigned();
-            $table->text('department_name')->unsigned();
-            $table->text('sale_center_name')->unsigned();
+            $table->bigInteger('sale_center_id')->unsigned()->nullable();
+            $table->text('department_name')->nullable();
+            $table->text('sale_center_name')->nullable();
             $table->timestamps();
         });
     }

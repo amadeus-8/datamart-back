@@ -14,6 +14,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         //
+        'App\Console\Commands\ImportData',
+        'App\Console\Commands\SeparateSources',
     ];
 
     /**
@@ -26,6 +28,14 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')
         //          ->hourly();
+//        try{
+//            $schedule->command('separate:run')
+//                ->hourly();
+                //$schedule->command('import:data')
+//                ->hourly();
+//        }catch (Exception $e){
+//            Log::error($e->getMessage());
+//        }
     }
 
     /**

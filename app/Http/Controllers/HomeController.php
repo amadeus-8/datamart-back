@@ -21,14 +21,14 @@ class HomeController extends Controller
      * Загрузка данных с файла csv
      */
     public function feedFromFile(Request $request){
-
+        ini_set('max_execution_time', 150000);
         request()->validate([
             'file' => 'required|mimes:xlsx'
         ]);
 
-        $path = request()->file('file')->getRealPath();
+        //$path = request()->file('file')->getRealPath();
 
-        $rows = (new FastExcel)->import($path)->toArray();
+        $rows = (new FastExcel)->import(request()->file('file'))->toArray();
         //remove first line
         $rows = array_slice($rows, 1);
 
