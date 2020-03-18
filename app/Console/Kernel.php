@@ -26,16 +26,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
-//        try{
-//            $schedule->command('separate:run')
-//                ->hourly();
-                //$schedule->command('import:data')
-//                ->hourly();
-//        }catch (Exception $e){
-//            Log::error($e->getMessage());
-//        }
+       $schedule->command('import:data')->withoutOverlapping(); 
     }
 
     /**

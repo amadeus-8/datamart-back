@@ -19,7 +19,7 @@ class CreateVehiclesTable extends Migration
             $table->unsignedInteger('vehicle_model_id');
             $table->unsignedInteger('vehicle_type_id');
             $table->char('year', 4);
-            $table->string('year_category_id', 15);
+            $table->unsignedInteger('year_category_id');
             $table->timestamps();
         });
     }

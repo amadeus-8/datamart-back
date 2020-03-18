@@ -55,4 +55,18 @@ class HomeController extends Controller
 
         return redirect()->route('home');
     }
+
+    public function uploadReport(){
+        $files_in_folder = Storage::files('pendingReports');
+        if(count($files_in_folder) > 0) {
+            print '<br><div style="text-align:center;">
+                <h1>Осталось файлов: ' . count($files_in_folder) . '</h1>
+                <img style="width: 50%;" src="/loader2.gif">
+            </div>';
+        } else {
+            print '<br><div style="text-align:center;">
+                <h1>Загрузка завершена</h1>
+            </div>';
+        }
+    }
 }

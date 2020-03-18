@@ -14,7 +14,7 @@ class AddColumnsToSalesCentre extends Migration
     public function up()
     {
         Schema::table('sale_centers', function (Blueprint $table) {
-            $table->integer('region_id')->unsigned()->nullable();
+            $table->integer('region_id')->unsigned()->default(0)->after('name');
         });
     }
 

@@ -63,13 +63,13 @@ class ImportData extends Command
         $files = $this->getFiles();
         // rename files
         foreach ($files as $key => $file){
-            $new_filename = 'pendingreports/inprocess_'.time(). '_' . $key.'.xlsx';
-            Storage::move($file, $new_filename);
-            $files[$key] = $new_filename;
+            $new_filename = 'pendingReports/inprocess_'.time(). '_' . $key.'.xlsx';
+		Storage::move($file, $new_filename);
+             $files[$key] = $new_filename;
+
         }
 
         foreach ($files as $file) {
-
             $orders = (new FastExcel)->import(storage_path('app/').$file, function ($line) {
 //                 return $this->importLineToDataTable($line);
                 return $this->processExcelLine($line);
@@ -110,6 +110,9 @@ class ImportData extends Command
      * @return Order
      */
     private function processExcelLine($line) {
+
+	
+
         $query = Order::where('isn', $line[Data::MAP_FIELDS['isn']])->first();
         if(isset($query->id) && $query->id != '') {
             echo "\torder already exists\n";
@@ -164,8 +167,10 @@ class ImportData extends Command
 
         // insert sale center
         if ( $line[Data::MAP_FIELDS['sale_center']] != '' ) {
+
             $sale_center = SaleCenter::where('name', $line[Data::MAP_FIELDS['sale_center']])->first()
-                ?? SaleCenter::create(['name' => $line[Data::MAP_FIELDS['sale_center']]]);
+                ?? SaleCenter::insert(['region_id' => $region->id,'name' => $line[Data::MAP_FIELDS['sale_center']]]);
+
             $order->sale_center_id = $sale_center->id;
             if($sale_center->region_id == null && isset($region->id)){
                 $sale_center->region_id = $region->id;
@@ -204,7 +209,7 @@ class ImportData extends Command
         }
 
         // insert client
-        $client = Client::where('isn', $line[Data::MAP_FIELDS['isn']])->first()
+         $client = Client::where('isn', $line[Data::MAP_FIELDS['isn']])->first()
             ?? Client::create([
                 'isn' => $line[Data::MAP_FIELDS['isn']],
                 'gender' => $line[Data::MAP_FIELDS['gender']],
@@ -308,6 +313,7 @@ class ImportData extends Command
             ]);
         $type->save();
 
+
         $brand = VehicleBrand::where('name', $_brand)->first()
             ?? new VehicleBrand([
                 'name' => $_brand,
@@ -356,16 +362,19 @@ class ImportData extends Command
                 'day' => date('d', strtotime($date)),
                 'month' => date('m', strtotime($date)),
                 'year' => date('y', strtotime($date)),
-                'day_of_week' => date('w', strtotime($date))
+                //'day_of_week' => date('w', strtotime($date)) 
             ]);
     }
 
     private function getFiles()
     {
-        $files_in_folder = Storage::files('pendingreports');
 
+        $files_in_folder = Storage::files('pendingReports');
         $files = [];
         foreach ($files_in_folder as $file){
+
+
+
             /*if(count($files) > 3)
                 break;*/
 
@@ -373,7 +382,10 @@ class ImportData extends Command
 //                continue;
 
             array_push($files, $file);
+
         }
+
+ 
 
         return $files;
     }
